@@ -1,0 +1,2428 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rivo - Navigate with Peace (Azure Maps)</title>
+
+    <!-- Fonts (Same as index.html) -->
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Open+Sans:wght@400;600&display=swap"
+        rel="stylesheet">
+
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Leaflet Map -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Use main site styles -->
+    <link rel="stylesheet" href="style.css">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        Rivo: {
+                            50: 'var(--Rivo-50)',
+                            100: 'var(--Rivo-100)',
+                            200: 'var(--Rivo-200)',
+                            300: 'var(--Rivo-300)',
+                            400: 'var(--Rivo-400)',
+                            500: 'var(--Rivo-500)',
+                            600: 'var(--Rivo-600)',
+                            700: 'var(--Rivo-700)',
+                            800: 'var(--Rivo-800)',
+                            900: 'var(--Rivo-900)',
+                        },
+                        sand: {
+                            50: 'var(--sand-50)',
+                            100: 'var(--sand-100)',
+                            200: 'var(--sand-200)',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['"Open Sans"', 'sans-serif'],
+                        heading: ['"Poppins"', 'sans-serif'],
+                    },
+                    boxShadow: {
+                        'soft': '0 10px 40px -10px rgba(14, 165, 162, 0.15)',
+                        'card': '0 4px 6px -1px rgba(0, 0, 0, 0.02), 0 2px 4px -1px rgba(0, 0, 0, 0.02)',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        :root {
+            /* Light mode defaults */
+            --Rivo-50: #F0F9F9;
+            --Rivo-100: #Ddf2f2;
+            --Rivo-200: #Bce3e3;
+            --Rivo-300: #90cece;
+            --Rivo-400: #5FB3B3;
+            --Rivo-500: #0EA5A2;
+            --Rivo-600: #0C8C89;
+            --Rivo-700: #286060;
+            --Rivo-800: #254E4E;
+            --Rivo-900: #214141;
+
+            --sand-50: #F8FAFC;
+            --sand-100: #F7F3EB;
+            --sand-200: #EFE6D6;
+
+            --panel-bg: #FFFFFF;
+            --input-bg: #F8FAFC;
+            --input-border: #E2E8F0;
+        }
+
+        /* Dark mode via class (toggle button) */
+        .dark-mode {
+            --Rivo-50: #1a2e2e;
+            --Rivo-100: #214141;
+            --Rivo-200: #254E4E;
+            --Rivo-300: #286060;
+            --Rivo-400: #0C8C89;
+            --Rivo-500: #0EA5A2;
+            --Rivo-600: #5FB3B3;
+            --Rivo-700: #90cece;
+            --Rivo-800: #Bce3e3;
+            --Rivo-900: #F0F9F9;
+
+            --sand-50: #0F172A;
+            --sand-100: #1E293B;
+            --sand-200: #334155;
+
+            --panel-bg: #1E293B;
+            --input-bg: #0F172A;
+            --input-border: #334155;
+        }
+
+        /* Dark mode overrides for Tailwind classes */
+        .dark-mode .bg-white,
+        .dark-mode .bg-white\/90,
+        .dark-mode .bg-white\/95 {
+            background-color: #1E293B !important;
+        }
+
+        .dark-mode .text-gray-800,
+        .dark-mode .text-gray-700,
+        .dark-mode .text-gray-600 {
+            color: #E5E7EB !important;
+        }
+
+        .dark-mode .text-gray-500,
+        .dark-mode .text-gray-400 {
+            color: #9CA3AF !important;
+        }
+
+        .dark-mode .border-gray-100,
+        .dark-mode .border-gray-200 {
+            border-color: #334155 !important;
+        }
+
+        .dark-mode .bg-gray-100,
+        .dark-mode .bg-gray-200 {
+            background-color: #334155 !important;
+        }
+
+        .dark-mode .preference-card {
+            background: linear-gradient(145deg, #1E293B 0%, #0F172A 100%) !important;
+            border-color: rgba(14, 165, 162, 0.2) !important;
+        }
+
+        .dark-mode .input-enhanced {
+            background: #0F172A !important;
+            border-color: #334155 !important;
+            color: #E5E7EB !important;
+        }
+
+        .dark-mode .glass-panel {
+            background: rgba(30, 41, 59, 0.95) !important;
+        }
+
+        .dark-mode .legend-enhanced {
+            background: rgba(30, 41, 59, 0.95) !important;
+        }
+
+        .dark-mode .stats-card {
+            background: linear-gradient(135deg, rgba(30,41,59,0.95) 0%, rgba(15,23,42,0.9) 100%) !important;
+        }
+
+        .dark-mode .demo-btn {
+            background: linear-gradient(145deg, #1E293B 0%, #0F172A 100%) !important;
+            border-color: #334155 !important;
+            color: #E5E7EB !important;
+        }
+
+        .dark-mode .bg-Rivo-50 {
+            background-color: #1a2e2e !important;
+        }
+
+        .dark-mode .bg-green-50 {
+            background-color: rgba(34, 197, 94, 0.1) !important;
+        }
+
+        .dark-mode .bg-orange-50 {
+            background-color: rgba(249, 115, 22, 0.1) !important;
+        }
+
+        /* Report Zone dark mode */
+        .dark-mode #reportPlaceSuggestions {
+            background: #1E293B !important;
+            border-color: #334155 !important;
+        }
+        
+        .dark-mode #reportPlaceSuggestions > div:hover {
+            background: #334155 !important;
+        }
+
+        .dark-mode .section-title {
+            background: linear-gradient(135deg, #5FB3B3 0%, #0EA5A2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Dark mode for autocomplete suggestions */
+        .dark-mode #startSuggestions,
+        .dark-mode #endSuggestions {
+            background: #1E293B !important;
+            border-color: #334155 !important;
+        }
+        
+        .dark-mode #startSuggestions > div,
+        .dark-mode #endSuggestions > div {
+            color: #E5E7EB !important;
+            border-color: #334155 !important;
+        }
+        
+        .dark-mode #startSuggestions > div:hover,
+        .dark-mode #endSuggestions > div:hover {
+            background: #0F172A !important;
+        }
+
+        /* Dark mode for placeholder text */
+        .dark-mode input::placeholder {
+            color: #6B7280 !important;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                /* Dark mode overrides */
+                --Rivo-50: #1a2e2e;
+                --Rivo-100: #214141;
+                --Rivo-200: #254E4E;
+                --Rivo-300: #286060;
+                --Rivo-400: #0C8C89;
+                --Rivo-500: #0EA5A2;
+                /* Keep primary same or slightly lighter? Keep same for now */
+                --Rivo-600: #5FB3B3;
+                /* Invert darker shades? */
+                --Rivo-700: #90cece;
+                --Rivo-800: #Bce3e3;
+                --Rivo-900: #F0F9F9;
+                /* Text should be light */
+
+                --sand-50: #0F172A;
+                /* Match surface dark */
+                --sand-100: #1E293B;
+                --sand-200: #334155;
+
+                --panel-bg: #1E293B;
+                --input-bg: #0F172A;
+                --input-border: #334155;
+            }
+        }
+
+        /* Inherit body styles from style.css */
+
+        *:focus-visible {
+            outline: 2px solid var(--Rivo-500);
+            outline-offset: 2px;
+        }
+
+        .skip-link {
+            position: absolute;
+            top: -40px;
+            left: 0;
+            background: var(--Rivo-500);
+            color: white;
+            padding: 8px;
+            z-index: 9999;
+            transition: top 0.3s;
+        }
+
+        .skip-link:focus {
+            top: 0;
+        }
+
+        #map {
+            width: 100%;
+            height: 100%;
+            border-radius: 1rem;
+            z-index: 10;
+        }
+
+        .loader {
+            border: 3px solid var(--sand-100);
+            border-radius: 50%;
+            border-top: 3px solid var(--Rivo-500);
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        @keyframes pulse-soft {
+            0% {
+                box-shadow: 0 0 0 0 rgba(14, 165, 162, 0.4);
+            }
+
+            70% {
+                box-shadow: 0 0 0 10px rgba(14, 165, 162, 0);
+            }
+
+            100% {
+                box-shadow: 0 0 0 0 rgba(14, 165, 162, 0);
+            }
+        }
+
+        .animate-pulse-soft {
+            animation: pulse-soft 2s infinite;
+        }
+
+        .toggle-container {
+            position: relative;
+            display: inline-block;
+            width: 40px;
+            height: 20px;
+            cursor: pointer;
+        }
+
+        .toggle-checkbox {
+            position: absolute;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            margin: 0;
+            padding: 0;
+            cursor: pointer;
+            z-index: 10;
+        }
+
+        .toggle-label {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--input-border);
+            border-radius: 20px;
+            transition: background-color 0.3s;
+            z-index: 1;
+        }
+
+        /* Fixed selector - works with div labels */
+        .toggle-checkbox:checked ~ .toggle-label {
+            background-color: var(--Rivo-500);
+        }
+
+        .toggle-slider {
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 16px;
+            height: 16px;
+            background-color: white;
+            border-radius: 50%;
+            transition: transform 0.3s ease;
+            z-index: 2;
+        }
+
+        .toggle-checkbox:checked ~ .toggle-label .toggle-slider {
+            transform: translateX(20px);
+        }
+
+        input[type="range"] {
+            -webkit-appearance: none;
+            appearance: none;
+            height: 6px;
+            background: var(--input-border);
+            border-radius: 3px;
+            outline: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            background: var(--Rivo-500);
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 2px 6px rgba(14, 165, 162, 0.3);
+        }
+
+        /* Enhanced UI Styles */
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+
+        @media (prefers-color-scheme: dark) {
+            .glass-panel {
+                background: rgba(30, 41, 59, 0.9);
+            }
+        }
+
+        .gradient-border {
+            position: relative;
+            background: linear-gradient(135deg, var(--Rivo-500) 0%, #14b8a6 100%);
+            padding: 2px;
+            border-radius: 1rem;
+        }
+
+        .gradient-border-inner {
+            background: var(--panel-bg);
+            border-radius: calc(1rem - 2px);
+            height: 100%;
+        }
+
+        .section-title {
+            background: linear-gradient(135deg, var(--Rivo-600) 0%, var(--Rivo-400) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .input-enhanced {
+            background: linear-gradient(145deg, var(--input-bg), #ffffff);
+            border: 1px solid rgba(14, 165, 162, 0.1);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .input-enhanced:hover {
+            border-color: rgba(14, 165, 162, 0.3);
+            box-shadow: 0 4px 12px rgba(14, 165, 162, 0.1);
+        }
+
+        .input-enhanced:focus {
+            border-color: var(--Rivo-500);
+            box-shadow: 0 0 0 4px rgba(14, 165, 162, 0.15);
+        }
+
+        .preference-card {
+            background: linear-gradient(145deg, #ffffff 0%, var(--sand-50) 100%);
+            border: 1px solid rgba(14, 165, 162, 0.08);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .preference-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(14, 165, 162, 0.12);
+            border-color: rgba(14, 165, 162, 0.2);
+        }
+
+        .btn-primary-enhanced {
+            background: linear-gradient(135deg, var(--Rivo-500) 0%, #14b8a6 50%, var(--Rivo-600) 100%);
+            background-size: 200% 200%;
+            animation: gradient-shift 3s ease infinite;
+            box-shadow: 0 4px 15px rgba(14, 165, 162, 0.4);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .btn-primary-enhanced:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(14, 165, 162, 0.5);
+        }
+
+        .btn-primary-enhanced:active {
+            transform: translateY(0);
+        }
+
+        @keyframes gradient-shift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .legend-enhanced {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(14, 165, 162, 0.1);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+        }
+
+        .stats-card {
+            background: linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(240,249,249,0.9) 100%);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(14, 165, 162, 0.15);
+            box-shadow: 0 8px 32px rgba(14, 165, 162, 0.1);
+        }
+
+        .icon-circle {
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+        }
+
+        .preference-card:hover .icon-circle {
+            transform: scale(1.1);
+        }
+
+        .demo-btn {
+            background: linear-gradient(145deg, #f8fafc 0%, #f1f5f9 100%);
+            border: 1px solid #e2e8f0;
+            transition: all 0.3s ease;
+        }
+
+        .demo-btn:hover {
+            background: linear-gradient(145deg, #f1f5f9 0%, #e2e8f0 100%);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        #swapLocationsBtn {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        #swapLocationsBtn.rotate-180 {
+            transform: rotate(180deg);
+        }
+
+        .floating-blob {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(60px);
+            opacity: 0.4;
+            animation: float 8s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            33% { transform: translate(30px, -30px) scale(1.05); }
+            66% { transform: translate(-20px, 20px) scale(0.95); }
+        }
+
+        .map-container {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .map-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 80px;
+            background: linear-gradient(to bottom, rgba(248, 250, 252, 0.8), transparent);
+            pointer-events: none;
+            z-index: 300;
+        }
+    </style>
+    <script>
+        if (localStorage.getItem('theme') === 'dark') document.documentElement.classList.add('dark-mode');
+    </script>
+</head>
+
+<body>
+
+    <a href="#demo" class="skip-link focus:outline-none">Skip to main content</a>
+
+    <!-- Theme Toggle -->
+    <button id="themeToggle" class="theme-toggle" aria-label="Toggle dark mode" 
+        style="z-index: 9999 !important; pointer-events: auto !important;">
+        <svg class="sun-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+            stroke-width="2">
+            <circle cx="12" cy="12" r="5" />
+            <line x1="12" y1="1" x2="12" y2="3" />
+            <line x1="12" y1="21" x2="12" y2="23" />
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+            <line x1="1" y1="12" x2="3" y2="12" />
+            <line x1="21" y1="12" x2="23" y2="12" />
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
+        </svg>
+        <svg class="moon-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+            stroke-width="2">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+        </svg>
+    </button>
+    
+    <script>
+        // Apply saved theme immediately to prevent flash
+        if (localStorage.getItem('theme') === 'dark') {
+            document.documentElement.classList.add('dark-mode');
+        }
+        
+        // Attach click handler directly after DOM ready
+        document.addEventListener('DOMContentLoaded', function() {
+            var btn = document.getElementById('themeToggle');
+            if (btn) {
+                btn.onclick = function(e) {
+                    e.preventDefault();
+                    var isDark = document.documentElement.classList.contains('dark-mode');
+                    if (isDark) {
+                        document.documentElement.classList.remove('dark-mode');
+                        localStorage.setItem('theme', 'light');
+                    } else {
+                        document.documentElement.classList.add('dark-mode');
+                        localStorage.setItem('theme', 'dark');
+                    }
+                    return false;
+                };
+            }
+        });
+    </script>
+
+    <div id="site-header-placeholder"></div>
+
+    <div class="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full -z-0 pointer-events-none opacity-50">
+        <div
+            class="absolute top-20 left-10 w-72 h-72 bg-Rivo-200 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-pulse-soft">
+        </div>
+        <div
+            class="absolute top-40 right-10 w-72 h-72 bg-sand-200 rounded-full mix-blend-multiply filter blur-3xl opacity-70">
+        </div>
+    </div>
+
+    <section id="demo" class="py-4 lg:py-6 relative min-h-screen">
+        <!-- Enhanced floating background elements -->
+        <div class="floating-blob w-96 h-96 bg-Rivo-300 top-20 -left-48" style="animation-delay: 0s;"></div>
+        <div class="floating-blob w-80 h-80 bg-teal-300 top-40 -right-40" style="animation-delay: 2s;"></div>
+        <div class="floating-blob w-64 h-64 bg-cyan-200 bottom-20 left-1/4" style="animation-delay: 4s;"></div>
+        
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <!-- Page Header -->
+            <div class="text-center mb-4 lg:mb-6">
+                <h1 class="text-2xl lg:text-3xl font-heading font-bold section-title mb-1">Navigate with Comfort</h1>
+                <p class="text-gray-500 text-xs lg:text-sm">Find routes optimized for your sensory preferences</p>
+            </div>
+            
+            <div
+                class="glass-panel rounded-2xl lg:rounded-3xl shadow-2xl overflow-hidden border border-Rivo-100/50 flex flex-col lg:flex-row h-[80vh] lg:h-[600px] max-h-[700px]">
+
+                <div
+                    class="w-full lg:w-[340px] p-4 lg:p-5 flex flex-col border-b lg:border-b-0 lg:border-r border-Rivo-100/30 bg-[var(--panel-bg)] z-20 overflow-y-auto">
+                    <div class="flex items-center gap-2 mb-4">
+                        <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-Rivo-500 to-teal-400 flex items-center justify-center text-white shadow-md text-sm">
+                            <i class="fa-solid fa-route"></i>
+                        </div>
+                        <h2 class="text-lg lg:text-xl font-heading font-bold text-Rivo-900">Plan Your Route</h2>
+                    </div>
+
+                    <div class="space-y-3 mb-4">
+                        <!-- Start Location Input -->
+                        <div class="relative group">
+                            <label class="text-[10px] font-medium text-gray-500 uppercase tracking-wider mb-1 block">Starting Point</label>
+                            <div class="relative">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <div class="w-2.5 h-2.5 rounded-full bg-gradient-to-br from-green-400 to-green-500 ring-2 ring-green-100"></div>
+                                </div>
+                                <input type="text" id="startInput"
+                                    class="input-enhanced block w-full pl-9 pr-10 py-2.5 rounded-lg leading-5 placeholder-gray-400 focus:outline-none text-sm font-medium"
+                                    placeholder="Enter starting location" value="Chandigarh">
+                                <button id="locateMeBtn"
+                                    class="absolute inset-y-0 right-0 pr-3 flex items-center cursor-pointer text-Rivo-400 hover:text-Rivo-600 transition-all hover:scale-110"
+                                    title="Use Current Location">
+                                    <i class="fa-solid fa-location-crosshairs"></i>
+                                </button>
+                            </div>
+                            <div id="startSuggestions"
+                                class="absolute top-full mt-1 w-full bg-white border border-gray-100 rounded-lg shadow-xl hidden max-h-40 overflow-y-auto z-50">
+                            </div>
+                        </div>
+
+                        <!-- Swap Button -->
+                        <div class="flex items-center justify-center -my-1">
+                            <button type="button" id="swapLocationsBtn" 
+                                class="w-8 h-8 rounded-full bg-gradient-to-br from-Rivo-100 to-Rivo-50 border border-Rivo-200 flex items-center justify-center text-Rivo-500 hover:text-Rivo-600 hover:from-Rivo-200 hover:to-Rivo-100 transition-all hover:scale-110 hover:shadow-md active:scale-95 cursor-pointer"
+                                title="Swap start and destination">
+                                <i class="fa-solid fa-arrows-up-down text-sm"></i>
+                            </button>
+                        </div>
+
+                        <!-- Destination Input -->
+                        <div class="relative group">
+                            <label class="text-[10px] font-medium text-gray-500 uppercase tracking-wider mb-1 block">Destination</label>
+                            <div class="relative">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <div class="w-2.5 h-2.5 rounded-full bg-gradient-to-br from-Rivo-500 to-teal-500 ring-2 ring-Rivo-100"></div>
+                                </div>
+                                <input type="text" id="endInput"
+                                    class="input-enhanced block w-full pl-9 pr-10 py-2.5 rounded-lg leading-5 placeholder-gray-400 focus:outline-none text-sm font-medium"
+                                    placeholder="Where do you want to go?" value="New Delhi">
+                                <button id="locateEndBtn"
+                                    class="absolute inset-y-0 right-0 pr-3 flex items-center cursor-pointer text-Rivo-400 hover:text-Rivo-600 transition-all hover:scale-110"
+                                    title="Use Current Location for Destination">
+                                    <i class="fa-solid fa-location-crosshairs"></i>
+                                </button>
+                            </div>
+                            <div id="endSuggestions"
+                                class="absolute top-full mt-1 w-full bg-white border border-gray-100 rounded-lg shadow-xl hidden max-h-40 overflow-y-auto z-50">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="space-y-3 mb-4">
+                        <div class="flex items-center gap-2">
+                            <i class="fa-solid fa-sliders text-Rivo-500 text-xs"></i>
+                            <h3 class="text-[10px] font-semibold text-gray-600 uppercase tracking-wider">Sensory Preferences</h3>
+                        </div>
+
+                        <!-- Noise Tolerance Slider -->
+                        <div class="preference-card p-3 rounded-lg">
+                            <div class="flex justify-between items-center mb-2">
+                                <div class="flex items-center gap-2">
+                                    <div class="icon-circle bg-purple-100 text-purple-500">
+                                        <i class="fa-solid fa-volume-low"></i>
+                                    </div>
+                                    <label class="text-xs font-semibold text-gray-800">Noise Tolerance</label>
+                                </div>
+                                <span id="noiseValue"
+                                    class="text-[10px] text-white font-semibold bg-gradient-to-r from-Rivo-500 to-teal-500 px-2 py-1 rounded-full shadow-sm">Quiet Priority</span>
+                            </div>
+                            <input type="range" id="noiseSlider" min="1" max="100" value="20"
+                                class="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer">
+                            <div class="flex justify-between text-[10px] text-gray-400 mt-1 font-medium">
+                                <span><i class="fa-solid fa-volume-xmark mr-1"></i>Silent</span>
+                                <span>Lively<i class="fa-solid fa-volume-high ml-1"></i></span>
+                            </div>
+                        </div>
+
+                        <!-- Toggle Options -->
+                        <div class="space-y-2">
+                            <label class="preference-card flex items-center justify-between p-3 rounded-lg cursor-pointer">
+                                <div class="flex items-center gap-2">
+                                    <div class="icon-circle bg-orange-100 text-orange-500">
+                                        <i class="fa-solid fa-users"></i>
+                                    </div>
+                                    <div>
+                                        <span class="text-xs font-semibold text-gray-800 block">Avoid Crowds</span>
+                                        <span class="text-[10px] text-gray-400">Prefer less busy paths</span>
+                                    </div>
+                                </div>
+                                <div class="toggle-container">
+                                    <input type="checkbox" id="toggle-crowds" class="toggle-checkbox">
+                                    <div class="toggle-label">
+                                        <span class="toggle-slider"></span>
+                                    </div>
+                                </div>
+                            </label>
+
+                            <label class="preference-card flex items-center justify-between p-3 rounded-lg cursor-pointer">
+                                <div class="flex items-center gap-2">
+                                    <div class="icon-circle bg-blue-100 text-blue-500">
+                                        <i class="fa-solid fa-hard-hat"></i>
+                                    </div>
+                                    <div>
+                                        <span class="text-xs font-semibold text-gray-800 block">Avoid Construction</span>
+                                        <span class="text-[10px] text-gray-400">Skip noisy work zones</span>
+                                    </div>
+                                </div>
+                                <div class="toggle-container">
+                                    <input type="checkbox" id="toggle-const" class="toggle-checkbox">
+                                    <div class="toggle-label">
+                                        <span class="toggle-slider"></span>
+                                    </div>
+                                </div>
+                            </label>
+
+                            <label class="preference-card flex items-center justify-between p-3 rounded-lg cursor-pointer">
+                                <div class="flex items-center gap-2">
+                                    <div class="icon-circle bg-teal-100 text-teal-600">
+                                        <i class="fa-solid fa-traffic-light"></i>
+                                    </div>
+                                    <div>
+                                        <span class="text-xs font-semibold text-gray-800 block">Live Traffic Data</span>
+                                        <span class="text-[10px] text-gray-400">OpenStreetMap traffic info</span>
+                                    </div>
+                                </div>
+                                <div class="toggle-container">
+                                    <input type="checkbox" id="toggle-traffic" class="toggle-checkbox">
+                                    <div class="toggle-label">
+                                        <span class="toggle-slider"></span>
+                                    </div>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="mt-3 pt-3 border-t border-gray-100/50">
+                        <div class="flex items-center gap-2 mb-2">
+                            <i class="fa-solid fa-flask text-gray-400 text-xs"></i>
+                            <h3 class="text-[10px] font-semibold text-gray-500 uppercase tracking-wider">Demo Tools</h3>
+                        </div>
+                        <div class="grid grid-cols-2 gap-2">
+                            <button id="addNoiseBtn"
+                                class="demo-btn py-2 px-2 rounded-lg text-[10px] font-semibold flex items-center justify-center gap-1.5 text-gray-600">
+                                <i class="fa-solid fa-bullhorn text-orange-500"></i>
+                                <span>Add Noise</span>
+                            </button>
+                            <button id="clearZonesBtn"
+                                class="demo-btn py-2 px-2 rounded-lg text-[10px] font-semibold flex items-center justify-center gap-1.5 text-red-500 hover:bg-red-50">
+                                <i class="fa-solid fa-trash-can"></i>
+                                <span>Clear All</span>
+                            </button>
+                        </div>
+                        <p id="demoModeHint" class="hidden text-[10px] text-orange-600 mt-2 text-center animate-pulse bg-orange-50 p-1.5 rounded-lg">
+                            <i class="fa-solid fa-hand-pointer mr-1"></i> Click map to add noise.
+                        </p>
+                    </div>
+
+                    <button id="findRouteBtn"
+                        class="mt-4 w-full btn-primary-enhanced text-white font-bold py-3 rounded-lg flex items-center justify-center gap-2 text-sm group">
+                        <i class="fa-solid fa-wand-magic-sparkles group-hover:rotate-12 transition-transform"></i>
+                        <span>Find Comfortable Route</span>
+                        <i class="fa-solid fa-arrow-right group-hover:translate-x-1 transition-transform"></i>
+                    </button>
+                </div>
+
+                <div class="map-container relative w-full lg:flex-1 h-full bg-gradient-to-br from-sand-50 to-Rivo-50/30">
+                    <div id="map"></div>
+
+                    <div class="legend-enhanced absolute top-3 right-3 z-[400] p-3 rounded-xl text-[10px]">
+                        <h4 class="font-bold text-gray-800 mb-2 flex items-center gap-1.5 text-xs">
+                            <i class="fa-solid fa-map text-Rivo-500"></i>
+                            Legend
+                        </h4>
+                        <div class="space-y-1.5">
+                            <div class="flex items-center gap-2">
+                                <span class="w-3 h-3 rounded-full bg-gradient-to-br from-orange-300 to-orange-500 shadow-sm"></span>
+                                <span class="text-gray-600 font-medium">Noise Zone</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="w-3 h-3 rounded-full bg-gradient-to-br from-cyan-400 to-cyan-600 shadow-sm"></span>
+                                <span class="text-gray-600 font-medium">Construction</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="w-3 h-3 rounded-full bg-gradient-to-br from-red-400 to-red-600 shadow-sm"></span>
+                                <span class="text-gray-600 font-medium">User Added (5 min)</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="w-3 h-3 rounded-full bg-gradient-to-br from-Rivo-400 to-Rivo-600 shadow-sm"></span>
+                                <span class="text-gray-600 font-medium">Rivo Route</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="w-3 h-3 rounded-full bg-gradient-to-br from-gray-300 to-gray-500 shadow-sm"></span>
+                                <span class="text-gray-600 font-medium">Standard Route</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="gentleAlert"
+                        class="absolute bottom-6 left-1/2 -translate-x-1/2 z-[400] bg-white/95 backdrop-blur px-4 py-3 rounded-full shadow-lg border-l-4 border-yellow-400 hidden flex items-center gap-3 transition-all duration-500 max-w-md text-center">
+                        <i class="fa-solid fa-circle-info text-yellow-500"></i>
+                        <span id="alertText" class="text-sm font-medium text-gray-700">Note: Construction detected.
+                            Re-routing...</span>
+                    </div>
+
+                    <div id="routeStats"
+                        class="stats-card absolute bottom-4 left-4 z-[400] px-4 py-3 rounded-xl hidden">
+                        <div class="flex items-center gap-2 mb-3">
+                            <div class="w-6 h-6 rounded-md bg-gradient-to-br from-Rivo-500 to-teal-500 flex items-center justify-center text-white text-xs">
+                                <i class="fa-solid fa-check"></i>
+                            </div>
+                            <h4 class="text-xs font-bold text-gray-800">Comfortable Route</h4>
+                        </div>
+                        <div class="space-y-2">
+                            <div class="flex items-center gap-2 bg-Rivo-50 p-2 rounded-lg">
+                                <i class="fa-solid fa-route text-Rivo-500 text-sm"></i>
+                                <span id="routeDistance" class="text-Rivo-700 font-bold text-xs">1.2 km Rivo Route</span>
+                            </div>
+                            <div class="flex items-center gap-2 bg-green-50 p-2 rounded-lg">
+                                <i class="fa-solid fa-volume-xmark text-green-500 text-sm"></i>
+                                <span id="quietness" class="text-green-700 font-medium text-xs">Verified Quiet Path</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Report Zone by Place Name Section -->
+    <section class="py-10 bg-[var(--bg)]">
+        <div class="max-w-4xl mx-auto px-4">
+            <div class="glass-panel rounded-2xl shadow-soft p-8 border border-Rivo-500/20 relative overflow-hidden">
+                <!-- Background decoration -->
+                <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-Rivo-500/10 to-transparent rounded-full blur-2xl -translate-y-1/2 translate-x-1/2"></div>
+                <div class="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr from-red-500/10 to-transparent rounded-full blur-2xl translate-y-1/2 -translate-x-1/2"></div>
+                
+                <!-- Header -->
+                <div class="flex items-center gap-4 mb-6 relative">
+                    <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-red-400 to-red-600 flex items-center justify-center text-white shadow-lg shadow-red-500/25">
+                        <i class="fa-solid fa-bullhorn text-xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-heading font-bold text-[var(--text)] text-xl">Report a Zone</h3>
+                        <p class="text-[var(--muted)] text-sm">Help others avoid noisy, crowded, or construction areas</p>
+                    </div>
+                    <div class="ml-auto hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/20">
+                        <i class="fa-solid fa-clock text-amber-500 text-xs"></i>
+                        <span class="text-amber-600 dark:text-amber-400 text-xs font-medium">Auto-expires in 5 min</span>
+                    </div>
+                </div>
+                
+                <!-- Form -->
+                <div class="space-y-4 relative">
+                    <!-- Place Name Input with Current Location -->
+                    <div class="relative">
+                        <label class="block text-[var(--text)] text-sm font-medium mb-2">
+                            <i class="fa-solid fa-location-dot text-Rivo-500 mr-2"></i>Location
+                        </label>
+                        <div class="flex gap-2">
+                            <div class="relative flex-1">
+                                <input type="text" id="reportPlaceInput" 
+                                    class="w-full px-4 py-3.5 rounded-xl text-sm bg-[var(--input-bg)] border border-[var(--input-border)] text-[var(--text)] placeholder-[var(--muted)] focus:outline-none focus:ring-2 focus:ring-Rivo-500/50 focus:border-Rivo-500 transition-all"
+                                    placeholder="Enter place name (e.g., Sector 17, Chandigarh)">
+                                <div id="reportPlaceSuggestions" 
+                                    class="absolute top-full left-0 right-0 mt-1 bg-[var(--panel-bg)] rounded-xl shadow-lg border border-[var(--outline)] z-50 hidden max-h-48 overflow-y-auto">
+                                </div>
+                            </div>
+                            <button type="button" id="reportCurrentLocationBtn" 
+                                class="px-4 py-3.5 rounded-xl bg-[var(--input-bg)] border border-[var(--input-border)] text-[var(--muted)] hover:text-Rivo-500 hover:border-Rivo-500/50 hover:bg-Rivo-50 dark:hover:bg-Rivo-900/30 transition-all flex items-center gap-2"
+                                title="Use current location">
+                                <i class="fa-solid fa-location-crosshairs"></i>
+                                <span class="hidden sm:inline text-sm">My Location</span>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Zone Type and Report Button Row -->
+                    <div class="flex flex-col sm:flex-row gap-3">
+                        <!-- Zone Type Dropdown -->
+                        <div class="relative flex-1 sm:max-w-[200px]">
+                            <label class="block text-[var(--text)] text-sm font-medium mb-2">
+                                <i class="fa-solid fa-tag text-Rivo-500 mr-2"></i>Zone Type
+                            </label>
+                            <div class="relative">
+                                <select id="reportZoneType" 
+                                    class="w-full px-4 py-3.5 rounded-xl text-sm bg-[var(--input-bg)] border border-[var(--input-border)] text-[var(--text)] appearance-none cursor-pointer pr-10 focus:outline-none focus:ring-2 focus:ring-Rivo-500/50 focus:border-Rivo-500 transition-all">
+                                    <option value="noise">🔊 Noise Zone</option>
+                                    <option value="crowd">👥 Crowded Area</option>
+                                    <option value="construction">🚧 Construction</option>
+                                </select>
+                                <div class="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--muted)] pointer-events-none">
+                                    <i class="fa-solid fa-chevron-down text-xs"></i>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Report Button -->
+                        <div class="flex-1 sm:flex-none flex items-end">
+                            <button id="reportZoneBtn" 
+                                class="w-full sm:w-auto bg-gradient-to-r from-Rivo-500 to-teal-500 hover:from-Rivo-600 hover:to-teal-600 text-white font-bold px-8 py-3.5 rounded-xl flex items-center justify-center gap-2 text-sm whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-Rivo-500/25 hover:shadow-Rivo-500/40 transition-all duration-300 hover:scale-[1.02]"
+                                disabled>
+                                <i class="fa-solid fa-paper-plane"></i>
+                                <span>Report Zone</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Status Message -->
+                <div id="reportStatus" class="mt-4 text-sm hidden">
+                    <div class="flex items-center gap-2 p-4 rounded-xl">
+                        <i class="fa-solid fa-circle-check"></i>
+                        <span id="reportStatusText"></span>
+                    </div>
+                </div>
+                
+                <!-- Mobile expiry note -->
+                <div class="sm:hidden mt-4 flex items-center justify-center gap-2 text-xs text-[var(--muted)]">
+                    <i class="fa-solid fa-clock text-amber-500"></i>
+                    <span>Reports auto-expire in 5 minutes</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div id="site-footer-placeholder"></div>
+
+    <script src="layout.js"></script>
+
+    <script>
+        let map, noiseLayer, constructionLayer, crowdLayer, routeLayer, startMarker, endMarker, trafficLayer;
+        const AZURE_MAPS_KEY = 'YOUR_AZURE_MAPS_KEY'; // Replace with actual key
+        // Chandigarh to New Delhi Route
+        let startCoords = [76.7794, 30.7333]; // Chandigarh [Lng, Lat]
+        let endCoords = [77.2090, 28.6139]; // New Delhi [Lng, Lat]
+
+        let isCalculating = false;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            initMap();
+            initControls();
+            setupAutocomplete();
+            // Don't auto-locate on page load - let user click "Locate Me" button
+            // getUserLocation();
+
+            // Handle URL parameters for redirected routes
+            handleUrlParameters();
+        });
+
+        async function handleUrlParameters() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const startParam = urlParams.get('start');
+            const endParam = urlParams.get('end');
+
+            if (startParam || endParam) {
+                const startInput = document.getElementById('startInput');
+                const endInput = document.getElementById('endInput');
+
+                if (startParam && startInput) {
+                    startInput.value = startParam;
+                    // Trigger geocode for start
+                    const startResult = await fetchGeocode(startParam);
+                    if (startResult) {
+                        startCoords = [parseFloat(startResult.lon), parseFloat(startResult.lat)];
+                        if (startMarker) startMarker.setLatLng([startResult.lat, startResult.lon]);
+                    }
+                }
+
+                if (endParam && endInput) {
+                    endInput.value = endParam;
+                    // Trigger geocode for end
+                    const endResult = await fetchGeocode(endParam);
+                    if (endResult) {
+                        endCoords = [parseFloat(endResult.lon), parseFloat(endResult.lat)];
+                        if (endMarker) endMarker.setLatLng([endResult.lat, endResult.lon]);
+                    }
+                }
+
+                // If both are found, calculate route
+                if (startCoords && endCoords) {
+                    if (map) {
+                        map.fitBounds(L.latLngBounds([startCoords[1], startCoords[0]], [endCoords[1], endCoords[0]]), { padding: [50, 50] });
+                    }
+                    setTimeout(() => calculateAndDisplayRoute(false), 1000);
+                }
+            }
+        }
+
+        async function fetchGeocode(query) {
+            try {
+                const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1`;
+                const response = await fetch(url);
+                const results = await response.json();
+                return results.length > 0 ? results[0] : null;
+            } catch (error) {
+                console.error("Geocoding fetch error:", error);
+                return null;
+            }
+        }
+
+        function getUserLocation() {
+            if (!navigator.geolocation) {
+                alert("Geolocation is not supported by this browser.");
+                return;
+            }
+
+            const startInput = document.getElementById('startInput');
+            if (startInput) startInput.value = "Locating...";
+
+            // Try to get high accuracy location
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    const { latitude, longitude, accuracy } = position.coords;
+                    startCoords = [longitude, latitude];
+
+                    console.log("✓ Location detected:", {
+                        latitude: latitude.toFixed(6),
+                        longitude: longitude.toFixed(6),
+                        accuracy: Math.round(accuracy) + "m"
+                    });
+
+                    // Update marker position
+                    if (startMarker) {
+                        startMarker.setLatLng([latitude, longitude]);
+                    }
+
+                    // Center map on user location
+                    if (map) {
+                        map.setView([latitude, longitude], 15, { animate: true });
+                    }
+
+                    // Get address from coordinates
+                    fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=18&addressdetails=1`)
+                        .then(res => res.json())
+                        .then(data => {
+                            if (data.display_name && startInput) {
+                                startInput.value = data.display_name;
+                                console.log("✓ Address found:", data.display_name);
+                            } else {
+                                startInput.value = `${latitude.toFixed(4)}, ${longitude.toFixed(4)}`;
+                            }
+                        })
+                        .catch(err => {
+                            console.error("Reverse geocoding failed:", err);
+                            if (startInput) {
+                                startInput.value = `${latitude.toFixed(4)}, ${longitude.toFixed(4)}`;
+                            }
+                        });
+
+                    // Focus on destination input
+                    const endInput = document.getElementById('endInput');
+                    if (endInput) endInput.focus();
+                },
+                (error) => {
+                    console.error('Geolocation Error:', error);
+                    const startInput = document.getElementById('startInput');
+
+                    let errorMsg = "Location unavailable";
+                    let userMsg = "";
+
+                    switch (error.code) {
+                        case error.PERMISSION_DENIED:
+                            errorMsg = "Location permission denied";
+                            userMsg = "Please allow location access in your browser settings and try again.";
+                            break;
+                        case error.POSITION_UNAVAILABLE:
+                            errorMsg = "Location unavailable";
+                            userMsg = "Your device couldn't determine your location. Try moving to an area with better GPS signal.";
+                            break;
+                        case error.TIMEOUT:
+                            errorMsg = "Location timeout";
+                            userMsg = "Location request took too long. Please try again.";
+                            break;
+                    }
+
+                    console.warn(`Geolocation failed: ${errorMsg}`);
+                    if (startInput) startInput.value = "Sector 1, CGC Landran";
+                    alert(`Could not get your location: ${userMsg}`);
+                },
+                {
+                    enableHighAccuracy: true,
+                    timeout: 15000,
+                    maximumAge: 0
+                }
+            );
+        }
+
+        // --- OSRM API Helper ---
+        async function getOSRMRoute(waypoints) {
+            // waypoints is array of [lng, lat]
+            const coordsString = waypoints.map(pt => `${pt[0]},${pt[1]}`).join(';');
+            // Request 'steps=true' and 'annotations=true' to get detailed leg breakdown if needed
+            const url = `https://router.project-osrm.org/route/v1/driving/${coordsString}?overview=full&geometries=geojson&steps=true`;
+
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+                if (data.code === 'Ok') {
+                    return data.routes[0];
+                }
+                throw new Error(data.code);
+            } catch (err) {
+                console.error("OSRM Fetch Error:", err);
+                return null;
+            }
+        }
+
+        // Simple point-to-segment distance (no corrections)
+        function pointToSegmentDistance(px, py, x1, y1, x2, y2) {
+            const dx = x2 - x1;
+            const dy = y2 - y1;
+            const lengthSquared = dx * dx + dy * dy;
+
+            let t = 0;
+            if (lengthSquared > 0) {
+                t = ((px - x1) * dx + (py - y1) * dy) / lengthSquared;
+                t = Math.max(0, Math.min(1, t));
+            }
+
+            const closestX = x1 + t * dx;
+            const closestY = y1 + t * dy;
+
+            const distX = px - closestX;
+            const distY = py - closestY;
+
+            return {
+                dist: Math.sqrt(distX * distX + distY * distY),
+                closestX: closestX,
+                closestY: closestY,
+                t: t
+            };
+        }
+
+        // --- SIMPLE & FAST Route Solver ---
+        // Collect ALL obstacles that hit the route and create waypoints around each
+        async function solveSafeRoute(start, end, obstacles) {
+            console.log("🚗 Route calculation with", obstacles.length, "obstacles");
+            console.log("📍 Obstacles:", obstacles);
+            
+            if (obstacles.length === 0) {
+                const route = await getOSRMRoute([start, end]);
+                return { route, waypoints: [start, end] };
+            }
+
+            // Helper to check which obstacles are on a route
+            function getHitObstacles(route, allObstacles, radius) {
+                const hits = [];
+                if (!route || !route.geometry || !route.geometry.coordinates) return hits;
+                const coords = route.geometry.coordinates;
+                
+                for (const obs of allObstacles) {
+                    let obsMinDist = Infinity;
+                    for (let i = 0; i < coords.length - 1; i++) {
+                        const p1 = coords[i];
+                        const p2 = coords[i + 1];
+                        const result = pointToSegmentDistance(obs[0], obs[1], p1[0], p1[1], p2[0], p2[1]);
+                        if (result.dist < obsMinDist) obsMinDist = result.dist;
+                    }
+                    console.log("📍 Obstacle", obs, "dist:", obsMinDist.toFixed(5), obsMinDist < radius ? "✅ HIT" : "❌ miss");
+                    if (obsMinDist < radius) {
+                        hits.push({ coords: obs, dist: obsMinDist });
+                    }
+                }
+                return hits;
+            }
+
+            // PRECISE detection: 0.005 = ~500m - only catch points actually ON the route
+            const detectionRadius = 0.005;
+            // Detour offset: 0.05 = ~5km - enough to force a DIFFERENT road
+            const detourOffset = 0.05;
+
+            // Get direct route first
+            const directRoute = await getOSRMRoute([start, end]);
+            if (!directRoute) {
+                return { route: null, waypoints: [start, end] };
+            }
+            
+            console.log("📏 Direct route:", Math.round(directRoute.distance/1000), "km");
+
+            // Find ALL obstacles that hit the direct route
+            let hitObstacles = getHitObstacles(directRoute, obstacles, detectionRadius);
+            
+            if (hitObstacles.length === 0) {
+                console.log("✅ Direct route is clear!");
+                return { route: directRoute, waypoints: [start, end] };
+            }
+            
+            console.log("⚠️ OBSTACLES DETECTED:", hitObstacles.length);
+
+            // Sort obstacles by longitude (west to east) to create ordered waypoints
+            hitObstacles.sort((a, b) => a.coords[0] - b.coords[0]);
+            
+            // Try WEST detours (go left/west of all obstacles)
+            let westWaypoints = [start];
+            for (const hit of hitObstacles) {
+                westWaypoints.push([hit.coords[0] - detourOffset, hit.coords[1]]);
+            }
+            westWaypoints.push(end);
+            
+            // Try EAST detours (go right/east of all obstacles)
+            let eastWaypoints = [start];
+            for (const hit of hitObstacles) {
+                eastWaypoints.push([hit.coords[0] + detourOffset, hit.coords[1]]);
+            }
+            eastWaypoints.push(end);
+            
+            console.log("🔄 Trying WEST route with", westWaypoints.length, "waypoints");
+            const routeWest = await getOSRMRoute(westWaypoints);
+            
+            console.log("🔄 Trying EAST route with", eastWaypoints.length, "waypoints");
+            const routeEast = await getOSRMRoute(eastWaypoints);
+            
+            // Check if detours are clear
+            const westHits = routeWest ? getHitObstacles(routeWest, obstacles, detectionRadius) : [];
+            const eastHits = routeEast ? getHitObstacles(routeEast, obstacles, detectionRadius) : [];
+            
+            const westClear = routeWest && westHits.length === 0;
+            const eastClear = routeEast && eastHits.length === 0;
+            
+            console.log("🔍 West clear:", westClear, "| East clear:", eastClear);
+            if (routeWest) console.log("   West distance:", Math.round(routeWest.distance/1000), "km");
+            if (routeEast) console.log("   East distance:", Math.round(routeEast.distance/1000), "km");
+            
+            // Pick the best route
+            let bestRoute = directRoute;
+            let bestWaypoints = [start, end];
+            
+            if (westClear && eastClear) {
+                if (routeWest.distance <= routeEast.distance) {
+                    bestRoute = routeWest;
+                    bestWaypoints = westWaypoints;
+                    console.log("✅ Using WEST route (shorter):", Math.round(routeWest.distance/1000), "km");
+                } else {
+                    bestRoute = routeEast;
+                    bestWaypoints = eastWaypoints;
+                    console.log("✅ Using EAST route (shorter):", Math.round(routeEast.distance/1000), "km");
+                }
+            } else if (westClear) {
+                bestRoute = routeWest;
+                bestWaypoints = westWaypoints;
+                console.log("✅ Using WEST route:", Math.round(routeWest.distance/1000), "km");
+            } else if (eastClear) {
+                bestRoute = routeEast;
+                bestWaypoints = eastWaypoints;
+                console.log("✅ Using EAST route:", Math.round(routeEast.distance/1000), "km");
+            } else {
+                // Neither clear - use larger offset to FORCE different roads
+                console.log("⚠️ Neither route clear, trying larger offset...");
+                const largerOffset = 0.1; // ~10km to definitely use different road
+                
+                let farWestWaypoints = [start];
+                let farEastWaypoints = [start];
+                for (const hit of hitObstacles) {
+                    farWestWaypoints.push([hit.coords[0] - largerOffset, hit.coords[1]]);
+                    farEastWaypoints.push([hit.coords[0] + largerOffset, hit.coords[1]]);
+                }
+                farWestWaypoints.push(end);
+                farEastWaypoints.push(end);
+                
+                const farWest = await getOSRMRoute(farWestWaypoints);
+                const farEast = await getOSRMRoute(farEastWaypoints);
+                
+                // Pick the SHORTEST one that works
+                const farWestClear = farWest && getHitObstacles(farWest, obstacles, detectionRadius).length === 0;
+                const farEastClear = farEast && getHitObstacles(farEast, obstacles, detectionRadius).length === 0;
+                
+                if (farWestClear && farEastClear) {
+                    if (farWest.distance <= farEast.distance) {
+                        bestRoute = farWest;
+                        bestWaypoints = farWestWaypoints;
+                        console.log("✅ Using FAR WEST route:", Math.round(farWest.distance/1000), "km");
+                    } else {
+                        bestRoute = farEast;
+                        bestWaypoints = farEastWaypoints;
+                        console.log("✅ Using FAR EAST route:", Math.round(farEast.distance/1000), "km");
+                    }
+                } else if (farWestClear) {
+                    bestRoute = farWest;
+                    bestWaypoints = farWestWaypoints;
+                    console.log("✅ Using FAR WEST route:", Math.round(farWest.distance/1000), "km");
+                } else if (farEastClear) {
+                    bestRoute = farEast;
+                    bestWaypoints = farEastWaypoints;
+                    console.log("✅ Using FAR EAST route:", Math.round(farEast.distance/1000), "km");
+                } else {
+                    // Try EVEN LARGER offset - 15km
+                    console.log("⚠️ Still hitting obstacles, trying 15km offset...");
+                    const hugeOffset = 0.15;
+                    
+                    let hugeWestWaypoints = [start];
+                    let hugeEastWaypoints = [start];
+                    for (const hit of hitObstacles) {
+                        hugeWestWaypoints.push([hit.coords[0] - hugeOffset, hit.coords[1]]);
+                        hugeEastWaypoints.push([hit.coords[0] + hugeOffset, hit.coords[1]]);
+                    }
+                    hugeWestWaypoints.push(end);
+                    hugeEastWaypoints.push(end);
+                    
+                    const hugeWest = await getOSRMRoute(hugeWestWaypoints);
+                    const hugeEast = await getOSRMRoute(hugeEastWaypoints);
+                    
+                    const hugeWestClear = hugeWest && getHitObstacles(hugeWest, obstacles, detectionRadius).length === 0;
+                    const hugeEastClear = hugeEast && getHitObstacles(hugeEast, obstacles, detectionRadius).length === 0;
+                    
+                    if (hugeWestClear && hugeEastClear) {
+                        if (hugeWest.distance <= hugeEast.distance) {
+                            bestRoute = hugeWest;
+                            bestWaypoints = hugeWestWaypoints;
+                            console.log("✅ Using HUGE WEST route:", Math.round(hugeWest.distance/1000), "km");
+                        } else {
+                            bestRoute = hugeEast;
+                            bestWaypoints = hugeEastWaypoints;
+                            console.log("✅ Using HUGE EAST route:", Math.round(hugeEast.distance/1000), "km");
+                        }
+                    } else if (hugeWestClear) {
+                        bestRoute = hugeWest;
+                        bestWaypoints = hugeWestWaypoints;
+                        console.log("✅ Using HUGE WEST route:", Math.round(hugeWest.distance/1000), "km");
+                    } else if (hugeEastClear) {
+                        bestRoute = hugeEast;
+                        bestWaypoints = hugeEastWaypoints;
+                        console.log("✅ Using HUGE EAST route:", Math.round(hugeEast.distance/1000), "km");
+                    } else {
+                        // Absolute last resort - pick shortest CLEAR route from all candidates
+                        const allCandidates = [
+                            { route: routeWest, waypoints: westWaypoints, name: 'WEST', hits: westHits.length },
+                            { route: routeEast, waypoints: eastWaypoints, name: 'EAST', hits: eastHits.length },
+                            { route: farWest, waypoints: farWestWaypoints, name: 'FAR WEST', hits: farWest ? getHitObstacles(farWest, obstacles, detectionRadius).length : 999 },
+                            { route: farEast, waypoints: farEastWaypoints, name: 'FAR EAST', hits: farEast ? getHitObstacles(farEast, obstacles, detectionRadius).length : 999 },
+                            { route: hugeWest, waypoints: hugeWestWaypoints, name: 'HUGE WEST', hits: hugeWest ? getHitObstacles(hugeWest, obstacles, detectionRadius).length : 999 },
+                            { route: hugeEast, waypoints: hugeEastWaypoints, name: 'HUGE EAST', hits: hugeEast ? getHitObstacles(hugeEast, obstacles, detectionRadius).length : 999 }
+                        ].filter(c => c.route);
+                        
+                        // Sort by: 1) fewest hits, 2) shortest distance
+                        allCandidates.sort((a, b) => {
+                            if (a.hits !== b.hits) return a.hits - b.hits;
+                            return a.route.distance - b.route.distance;
+                        });
+                        
+                        if (allCandidates.length > 0) {
+                            bestRoute = allCandidates[0].route;
+                            bestWaypoints = allCandidates[0].waypoints;
+                            if (allCandidates[0].hits === 0) {
+                                console.log("✅ Using", allCandidates[0].name, "route (clear):", Math.round(bestRoute.distance/1000), "km");
+                            } else {
+                                console.log("⚠️ Using", allCandidates[0].name, "route (", allCandidates[0].hits, "hits):", Math.round(bestRoute.distance/1000), "km");
+                            }
+                        }
+                    }
+                }
+            }
+            
+            return { route: bestRoute, waypoints: bestWaypoints };
+        }
+
+        function initMap() {
+            // Chandigarh to New Delhi route - centered between the two cities
+            const mapCenter = [29.6750, 77.0000]; // Midpoint [Lat, Lng]
+
+            map = L.map('map').setView(mapCenter, 9); // Zoom 9 to show full route
+
+            // Add OpenStreetMap Tiles
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            }).addTo(map);
+
+            // Layer Groups
+            noiseLayer = L.layerGroup().addTo(map);
+            constructionLayer = L.layerGroup().addTo(map);
+            crowdLayer = L.layerGroup().addTo(map);
+            routeLayer = L.layerGroup().addTo(map);
+
+            // Custom Icons
+            const startIcon = L.divIcon({
+                className: 'custom-icon', // no-op class
+                html: `<div style="background-color:#0EA5A2;width:16px;height:16px;border-radius:50%;border:3px solid white;box-shadow:0 2px 5px rgba(0,0,0,0.3);"></div>`,
+                iconSize: [16, 16],
+                iconAnchor: [8, 8]
+            });
+
+            const endIcon = L.divIcon({
+                className: 'custom-icon',
+                html: `<div style="background-color:#214141;width:24px;height:24px;border-radius:50%;border:3px solid white;box-shadow:0 2px 5px rgba(0,0,0,0.3);display:flex;justify-content:center;align-items:center;"><i class='fa-solid fa-flag-checkered' style='color:white;font-size:12px;'></i></div>`,
+                iconSize: [24, 24],
+                iconAnchor: [12, 12]
+            });
+
+            // Add initial markers
+            startMarker = L.marker([startCoords[1], startCoords[0]], { icon: startIcon }).addTo(map);
+            endMarker = L.marker([endCoords[1], endCoords[0]], { icon: endIcon }).addTo(map);
+
+            addNoiseZones();
+            addConstructionZones();
+            addCrowdZones();
+            
+            // Load user-saved noise zones
+            loadSavedNoiseZones();
+        }
+
+        // Global Zones for Chandigarh to New Delhi Route (stored as [Lng, Lat])
+        let globalNoiseZones = [
+            [76.9700, 29.6857],  // Karnal - Market area
+            [76.9400, 29.3909],  // Panipat - Industrial area
+            [77.0400, 28.9931],  // Sonipat - Factory area
+            [77.0800, 28.7041],  // Delhi Border area
+            [77.2500, 28.7041],  // Delhi - Ring Road area
+            [77.2090, 28.6500]   // Connaught Place area
+        ];
+        let globalConstructionZones = [
+            [76.7500, 30.3752],  // Ambala Cantt - Railway construction
+            [77.0400, 28.9931],  // Sonipat - Metro construction
+            [77.1700, 28.6500],  // East Delhi - Infrastructure
+            [77.2400, 28.6350]   // Central Delhi - Building work
+        ];
+        let globalCrowdZones = [
+            [76.9700, 29.6900],  // Karnal Bus Stand
+            [76.9400, 29.3850],  // Panipat Market
+            [77.0350, 28.9900],  // Sonipat City
+            [77.1900, 28.6700],  // Shahdara
+            [77.2500, 28.6300],  // Chandni Chowk
+            [77.2200, 28.6139]   // New Delhi Railway Station
+        ];
+        
+        // User-added noise zones with timestamps (for auto-expiry)
+        let userNoiseZones = [];
+        let userNoiseMarkers = []; // Track markers for removal
+
+        // Load saved noise zones from localStorage (filter out expired ones)
+        // Also loads zones from index.html's Report Zone feature (userReportedZones)
+        function loadSavedNoiseZones() {
+            const now = Date.now();
+            const FIVE_MINUTES = 5 * 60 * 1000;
+            
+            try {
+                // Load from rivo's own storage
+                const saved = localStorage.getItem('rivoUserNoiseZones');
+                if (saved) {
+                    const allZones = JSON.parse(saved);
+                    
+                    // Filter out zones older than 5 minutes
+                    userNoiseZones = allZones.filter(zone => {
+                        const age = now - (zone.timestamp || 0);
+                        return age < FIVE_MINUTES;
+                    });
+                    
+                    // Save filtered list back
+                    saveNoiseZones();
+                    
+                    console.log("📂 Loaded", userNoiseZones.length, "valid noise zones from rivo storage");
+                    
+                    // Add saved zones to globalNoiseZones for route calculation
+                    userNoiseZones.forEach(zone => {
+                        globalNoiseZones.push(zone.coords);
+                        addUserNoiseMarkerWithExpiry(zone.coords[1], zone.coords[0], zone.timestamp);
+                    });
+                }
+                
+                // Also load zones reported via index.html Report Zone feature
+                const indexZones = localStorage.getItem('userReportedZones');
+                if (indexZones) {
+                    const parsedIndexZones = JSON.parse(indexZones);
+                    const validIndexZones = parsedIndexZones.filter(zone => {
+                        const age = now - (zone.timestamp || 0);
+                        return age < FIVE_MINUTES;
+                    });
+                    
+                    console.log("📂 Loaded", validIndexZones.length, "zones from index.html Report Zone");
+                    
+                    validIndexZones.forEach(zone => {
+                        // Add to appropriate array based on type
+                        if (zone.type === 'noise') {
+                            globalNoiseZones.push(zone.coords);
+                        } else if (zone.type === 'crowd') {
+                            globalCrowdZones.push(zone.coords);
+                        } else if (zone.type === 'construction') {
+                            globalConstructionZones.push(zone.coords);
+                        }
+                        // Add visual marker
+                        addUserNoiseMarkerWithExpiry(zone.coords[1], zone.coords[0], zone.timestamp);
+                    });
+                    
+                    // Clean up expired zones from index storage
+                    localStorage.setItem('userReportedZones', JSON.stringify(validIndexZones));
+                }
+            } catch (e) {
+                console.error("Error loading saved zones:", e);
+                userNoiseZones = [];
+            }
+        }
+
+        // Save noise zones to localStorage
+        function saveNoiseZones() {
+            try {
+                localStorage.setItem('rivoUserNoiseZones', JSON.stringify(userNoiseZones));
+                console.log("💾 Saved", userNoiseZones.length, "noise zones to localStorage");
+            } catch (e) {
+                console.error("Error saving zones:", e);
+            }
+        }
+
+        // Add visual marker for user noise zone with auto-expiry
+        function addUserNoiseMarkerWithExpiry(lat, lng, timestamp) {
+            const FIVE_MINUTES = 5 * 60 * 1000;
+            const timeLeft = FIVE_MINUTES - (Date.now() - timestamp);
+            const minutesLeft = Math.ceil(timeLeft / 60000);
+            
+            // Small outer ring
+            const circle = L.circle([lat, lng], {
+                color: '#DC2626',
+                fillColor: '#DC2626',
+                fillOpacity: 0.25,
+                radius: 100,
+                stroke: true,
+                weight: 2
+            }).addTo(noiseLayer);
+            
+            // Center dot
+            const marker = L.circleMarker([lat, lng], {
+                color: '#DC2626',
+                fillColor: '#FEE2E2',
+                fillOpacity: 1,
+                radius: 5,
+                weight: 2
+            }).addTo(noiseLayer).bindPopup(`<b>⚠️ Noise Zone</b><br>Expires in ~${minutesLeft} min`);
+            
+            // Store markers for removal
+            userNoiseMarkers.push({ circle, marker, coords: [lng, lat], timestamp });
+            
+            // Set auto-removal timer
+            if (timeLeft > 0) {
+                setTimeout(() => {
+                    removeExpiredZone([lng, lat]);
+                }, timeLeft);
+            }
+        }
+        
+        // Add marker (wrapper for click handler)
+        function addUserNoiseMarker(lat, lng) {
+            addUserNoiseMarkerWithExpiry(lat, lng, Date.now());
+        }
+        
+        // Remove expired zone
+        function removeExpiredZone(coords) {
+            console.log("⏰ Auto-removing expired noise zone at:", coords);
+            
+            // Remove from globalNoiseZones
+            globalNoiseZones = globalNoiseZones.filter(z => 
+                !(z[0] === coords[0] && z[1] === coords[1])
+            );
+            
+            // Remove from userNoiseZones
+            userNoiseZones = userNoiseZones.filter(z => 
+                !(z.coords[0] === coords[0] && z.coords[1] === coords[1])
+            );
+            
+            // Remove markers from map
+            const markerData = userNoiseMarkers.find(m => 
+                m.coords[0] === coords[0] && m.coords[1] === coords[1]
+            );
+            if (markerData) {
+                noiseLayer.removeLayer(markerData.circle);
+                noiseLayer.removeLayer(markerData.marker);
+                userNoiseMarkers = userNoiseMarkers.filter(m => m !== markerData);
+            }
+            
+            // Update localStorage
+            saveNoiseZones();
+            
+            // Recalculate route
+            calculateAndDisplayRoute(true);
+        }
+
+        function addNoiseZones() {
+            globalNoiseZones.forEach(zone => {
+                L.circle([zone[1], zone[0]], {
+                    color: '#F97316',
+                    fillColor: '#F97316',
+                    fillOpacity: 0.25,
+                    radius: 100,
+                    stroke: true,
+                    weight: 2
+                }).addTo(noiseLayer).bindPopup("<b>Noise Zone</b><br>High decibel area");
+            });
+        }
+
+        function addConstructionZones() {
+            globalConstructionZones.forEach(zone => {
+                L.circle([zone[1], zone[0]], {
+                    color: '#164e63',
+                    fillColor: '#0891b2',
+                    fillOpacity: 0.25,
+                    radius: 150,
+                    weight: 2
+                }).addTo(constructionLayer).bindPopup("<b>Construction Zone</b><br>Machinery noise");
+            });
+        }
+
+        function addCrowdZones() {
+            globalCrowdZones.forEach(zone => {
+                L.circle([zone[1], zone[0]], {
+                    color: '#F97316',
+                    fillColor: '#FFA500',
+                    fillOpacity: 0.15,
+                    radius: 120,
+                    weight: 1,
+                    dashArray: '3, 3'
+                }).addTo(crowdLayer).bindPopup("<b>Crowded Area</b><br>High pedestrian density");
+            });
+        }
+
+        function setupAutocomplete() {
+            const startInput = document.getElementById('startInput');
+            const endInput = document.getElementById('endInput');
+            const startSuggestions = document.getElementById('startSuggestions');
+            const endSuggestions = document.getElementById('endSuggestions');
+            const locateMeBtn = document.getElementById('locateMeBtn');
+
+            // Debounce function
+            const debounce = (func, wait) => {
+                let timeout;
+                return function executedFunction(...args) {
+                    const later = () => {
+                        clearTimeout(timeout);
+                        func(...args);
+                    };
+                    clearTimeout(timeout);
+                    timeout = setTimeout(later, wait);
+                };
+            };
+
+            const handleInput = debounce((e, suggestionsDiv, isStart) => {
+                if (e.target.value.length > 2) {
+                    fetchSuggestions(e.target.value, suggestionsDiv, e.target, isStart);
+                } else {
+                    suggestionsDiv.classList.add('hidden');
+                }
+            }, 500);
+
+            startInput.addEventListener('input', (e) => handleInput(e, startSuggestions, true));
+            endInput.addEventListener('input', (e) => handleInput(e, endSuggestions, false));
+
+            // Locate Me Button Logic
+            locateMeBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                console.log('🎯 Locate Me button clicked');
+                
+                const icon = locateMeBtn.querySelector('i');
+                icon.classList.remove('fa-location-crosshairs');
+                icon.classList.add('fa-spinner', 'fa-spin');
+                startInput.value = "Locating...";
+
+                // Check if running on HTTPS or localhost
+                if (location.protocol !== 'https:' && location.hostname !== 'localhost' && location.hostname !== '127.0.0.1') {
+                    console.warn('⚠️ Geolocation requires HTTPS');
+                    alert('Geolocation requires a secure connection (HTTPS). Please access this site via HTTPS.');
+                    icon.classList.remove('fa-spinner', 'fa-spin');
+                    icon.classList.add('fa-location-crosshairs');
+                    startInput.value = "Sector 1, CGC Landran";
+                    return;
+                }
+
+                getUserLocation();
+
+                // Reset icon after timeout if location takes too long
+                setTimeout(() => {
+                    icon.classList.remove('fa-spinner', 'fa-spin');
+                    icon.classList.add('fa-location-crosshairs');
+                }, 10000);
+            });
+
+            document.addEventListener('click', (e) => {
+                if (!e.target.closest('.relative')) {
+                    startSuggestions.classList.add('hidden');
+                    endSuggestions.classList.add('hidden');
+                }
+            });
+        }
+
+        async function fetchSuggestions(query, suggestionsDiv, inputElement, isStart) {
+            try {
+                const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5`;
+                const response = await fetch(url);
+                const results = await response.json();
+
+                suggestionsDiv.innerHTML = '';
+
+                if (results.length === 0) {
+                    suggestionsDiv.classList.add('hidden');
+                    return;
+                }
+
+                results.forEach(result => {
+                    const div = document.createElement('div');
+                    div.className = 'px-4 py-2 hover:bg-Rivo-50 cursor-pointer border-b text-sm text-gray-700 truncate';
+                    div.innerHTML = `<i class="fa-solid fa-location-dot text-Rivo-500 mr-2"></i>${result.display_name}`;
+                    div.addEventListener('click', () => {
+                        inputElement.value = result.display_name;
+                        suggestionsDiv.classList.add('hidden');
+
+                        const lat = parseFloat(result.lat);
+                        const lon = parseFloat(result.lon);
+
+                        if (isStart) {
+                            startCoords = [lon, lat];
+                            if (startMarker) startMarker.setLatLng([lat, lon]);
+                            if (map) map.flyTo([lat, lon], 14);
+                        } else {
+                            endCoords = [lon, lat];
+                            if (endMarker) endMarker.setLatLng([lat, lon]);
+                            if (map) map.fitBounds(L.latLngBounds([startCoords[1], startCoords[0]], [lat, lon]), { padding: [50, 50] });
+                        }
+                    });
+                    suggestionsDiv.appendChild(div);
+                });
+
+                suggestionsDiv.classList.remove('hidden');
+
+            } catch (error) {
+                console.error("Geocoding error:", error);
+            }
+        }
+
+        // ============================================
+        // REPORT ZONE BY PLACE NAME FUNCTIONALITY
+        // ============================================
+        
+        let reportPlaceCoords = null; // Store selected place coordinates
+        
+        function setupReportZone() {
+            const reportInput = document.getElementById('reportPlaceInput');
+            const reportSuggestions = document.getElementById('reportPlaceSuggestions');
+            const reportBtn = document.getElementById('reportZoneBtn');
+            const reportStatus = document.getElementById('reportStatus');
+            const reportStatusText = document.getElementById('reportStatusText');
+            const zoneTypeSelect = document.getElementById('reportZoneType');
+            
+            if (!reportInput || !reportBtn) return;
+            
+            // Show status message - defined early so it's available to all handlers
+            function showReportStatus(type, message) {
+                reportStatus.classList.remove('hidden');
+                reportStatusText.textContent = message;
+                
+                const container = reportStatus.querySelector('div');
+                const icon = reportStatus.querySelector('i');
+                
+                if (type === 'success') {
+                    container.className = 'flex items-center gap-3 p-4 rounded-xl bg-green-500/10 border border-green-500/20 text-green-600 dark:text-green-400';
+                    icon.className = 'fa-solid fa-circle-check text-lg';
+                } else {
+                    container.className = 'flex items-center gap-3 p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400';
+                    icon.className = 'fa-solid fa-circle-xmark text-lg';
+                }
+                
+                // Auto-hide after 5 seconds
+                setTimeout(() => {
+                    reportStatus.classList.add('hidden');
+                }, 5000);
+            }
+            
+            // Debounce for autocomplete
+            const debounce = (func, wait) => {
+                let timeout;
+                return function executedFunction(...args) {
+                    clearTimeout(timeout);
+                    timeout = setTimeout(() => func(...args), wait);
+                };
+            };
+            
+            // Fetch place suggestions
+            const fetchReportSuggestions = debounce(async (query) => {
+                if (query.length < 3) {
+                    reportSuggestions.classList.add('hidden');
+                    return;
+                }
+                
+                try {
+                    const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5`;
+                    const response = await fetch(url);
+                    const results = await response.json();
+                    
+                    reportSuggestions.innerHTML = '';
+                    
+                    if (results.length === 0) {
+                        reportSuggestions.classList.add('hidden');
+                        return;
+                    }
+                    
+                    results.forEach(result => {
+                        const div = document.createElement('div');
+                        div.className = 'px-4 py-3 hover:bg-Rivo-50 dark:hover:bg-Rivo-900/30 cursor-pointer border-b border-[var(--outline)] text-sm text-[var(--text)]';
+                        div.innerHTML = `<i class="fa-solid fa-location-dot text-Rivo-500 mr-2"></i><span class="truncate">${result.display_name}</span>`;
+                        div.addEventListener('click', () => {
+                            reportInput.value = result.display_name.split(',')[0]; // Short name
+                            reportPlaceCoords = {
+                                lat: parseFloat(result.lat),
+                                lng: parseFloat(result.lon),
+                                name: result.display_name.split(',')[0]
+                            };
+                            reportSuggestions.classList.add('hidden');
+                            reportBtn.disabled = false;
+                        });
+                        reportSuggestions.appendChild(div);
+                    });
+                    
+                    reportSuggestions.classList.remove('hidden');
+                    
+                } catch (error) {
+                    console.error("Report geocoding error:", error);
+                }
+            }, 500);
+            
+            // Input event listener
+            reportInput.addEventListener('input', (e) => {
+                reportPlaceCoords = null;
+                reportBtn.disabled = true;
+                fetchReportSuggestions(e.target.value);
+            });
+            
+            // Close suggestions when clicking outside
+            document.addEventListener('click', (e) => {
+                if (!e.target.closest('#reportPlaceInput') && !e.target.closest('#reportPlaceSuggestions')) {
+                    reportSuggestions.classList.add('hidden');
+                }
+            });
+            
+            // Current Location Button
+            const currentLocationBtn = document.getElementById('reportCurrentLocationBtn');
+            if (currentLocationBtn) {
+                currentLocationBtn.addEventListener('click', async () => {
+                    if (!navigator.geolocation) {
+                        showReportStatus('error', 'Geolocation is not supported by your browser');
+                        return;
+                    }
+                    
+                    // Show loading state
+                    const originalHTML = currentLocationBtn.innerHTML;
+                    currentLocationBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+                    currentLocationBtn.disabled = true;
+                    
+                    navigator.geolocation.getCurrentPosition(
+                        async (position) => {
+                            const lat = position.coords.latitude;
+                            const lng = position.coords.longitude;
+                            
+                            // Reverse geocode to get place name
+                            try {
+                                const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`;
+                                const response = await fetch(url);
+                                const data = await response.json();
+                                
+                                const placeName = data.address?.suburb || data.address?.neighbourhood || 
+                                                 data.address?.village || data.address?.town || 
+                                                 data.address?.city || 'Current Location';
+                                
+                                reportInput.value = placeName;
+                                reportPlaceCoords = { lat, lng, name: placeName };
+                                reportBtn.disabled = false;
+                                
+                                // Pan map to location
+                                if (map) map.flyTo([lat, lng], 14);
+                                
+                                showReportStatus('success', `📍 Location detected: ${placeName}`);
+                            } catch (e) {
+                                reportInput.value = 'Current Location';
+                                reportPlaceCoords = { lat, lng, name: 'Current Location' };
+                                reportBtn.disabled = false;
+                            }
+                            
+                            currentLocationBtn.innerHTML = originalHTML;
+                            currentLocationBtn.disabled = false;
+                        },
+                        (error) => {
+                            console.error('Geolocation error:', error);
+                            let errorMsg = 'Unable to get location';
+                            if (error.code === 1) errorMsg = 'Location permission denied';
+                            if (error.code === 2) errorMsg = 'Location unavailable';
+                            if (error.code === 3) errorMsg = 'Location request timed out';
+                            showReportStatus('error', errorMsg);
+                            currentLocationBtn.innerHTML = originalHTML;
+                            currentLocationBtn.disabled = false;
+                        },
+                        { enableHighAccuracy: true, timeout: 10000 }
+                    );
+                });
+            }
+            
+            // Report button click
+            reportBtn.addEventListener('click', async () => {
+                if (!reportPlaceCoords) return;
+                
+                const zoneType = zoneTypeSelect.value;
+                const { lat, lng, name } = reportPlaceCoords;
+                
+                // Disable button while processing
+                reportBtn.disabled = true;
+                reportBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i><span>Adding...</span>';
+                
+                try {
+                    // Add the zone to appropriate array based on type
+                    const timestamp = Date.now();
+                    
+                    if (zoneType === 'noise') {
+                        globalNoiseZones.push([lng, lat]);
+                    } else if (zoneType === 'crowd') {
+                        globalCrowdZones.push([lng, lat]);
+                    } else if (zoneType === 'construction') {
+                        globalConstructionZones.push([lng, lat]);
+                    }
+                    
+                    // Add to userNoiseZones with timestamp for persistence
+                    userNoiseZones.push({ coords: [lng, lat], type: zoneType, timestamp });
+                    saveNoiseZones();
+                    
+                    // Add visual marker with auto-expiry
+                    addUserNoiseMarkerWithExpiry(lat, lng, timestamp);
+                    
+                    // Pan map to show the new zone
+                    map.flyTo([lat, lng], 14);
+                    
+                    // Show success message
+                    const zoneLabels = { noise: 'Noise', crowd: 'Crowded', construction: 'Construction' };
+                    const zoneLabel = zoneLabels[zoneType] || zoneType;
+                    showReportStatus('success', `✓ ${zoneLabel} zone reported at "${name}" - expires in 5 min`);
+                    
+                    // Clear input
+                    reportInput.value = '';
+                    reportPlaceCoords = null;
+                    
+                    console.log(`📍 Zone reported via place name: ${name} at [${lat}, ${lng}]`);
+                    
+                } catch (error) {
+                    console.error("Error reporting zone:", error);
+                    showReportStatus('error', 'Failed to report zone. Please try again.');
+                }
+                
+                // Reset button
+                reportBtn.innerHTML = '<i class="fa-solid fa-paper-plane"></i><span>Report Zone</span>';
+            });
+        }
+        
+        // Initialize report zone on DOM ready
+        document.addEventListener('DOMContentLoaded', () => {
+            setupReportZone();
+        });
+
+        // --- Detour Logic ---
+
+        async function calculateAndDisplayRoute(isDemo = false) {
+            const btn = document.getElementById('findRouteBtn');
+            const btnText = btn.querySelector('span');
+            const btnIcon = btn.querySelector('i');
+            const alertBox = document.getElementById('gentleAlert');
+            const stats = document.getElementById('routeStats');
+            const toggleConst = document.getElementById('toggle-const');
+
+            if (isCalculating) return;
+            if (!isDemo && btn.disabled) return;
+
+            const originalText = "Suggest Comfortable Route";
+
+            try {
+                isCalculating = true;
+
+                console.log("🚗 Starting route calculation...");
+
+                if (!isDemo) {
+                    btn.disabled = true;
+                    btnText.innerText = "Calculating Safe Route...";
+                    btnIcon.classList.add("loader");
+                    btnIcon.classList.remove("fa-solid", "fa-wand-magic-sparkles", "group-hover:rotate-12", "transition-transform");
+                }
+
+                if (!routeLayer) {
+                    console.error("Map not ready");
+                    return;
+                }
+
+                routeLayer.clearLayers();
+
+                // Collect Obstacles based on UI toggles
+                const toggleCrowds = document.getElementById('toggle-crowds');
+                const avoidCrowds = toggleCrowds ? toggleCrowds.checked : true; // Default ON
+                const avoidConstruction = toggleConst ? toggleConst.checked : true; // Default ON
+
+                // ALWAYS avoid noise zones
+                let obstacles = [...globalNoiseZones];
+                
+                // Add crowds if enabled
+                if (avoidCrowds) {
+                    console.log("🚶 Including crowd zones to avoid");
+                    obstacles = [...obstacles, ...globalCrowdZones];
+                }
+                
+                // Add construction if enabled
+                if (avoidConstruction) {
+                    console.log("🏗️ Including construction zones to avoid");
+                    obstacles = [...obstacles, ...globalConstructionZones];
+                }
+
+                console.log("📍 Total obstacles to AVOID:", obstacles.length);
+                console.log("Noise zones:", globalNoiseZones.length);
+                console.log("Crowd zones:", avoidCrowds ? globalCrowdZones.length : 0);
+                console.log("Construction zones:", avoidConstruction ? globalConstructionZones.length : 0);
+
+                // Get noise tolerance from slider (affects detection radius)
+                const noiseSlider = document.getElementById('noiseSlider');
+                const noiseTolerance = noiseSlider ? parseInt(noiseSlider.value) : 20;
+                
+                // Lower tolerance (more Silent) = LARGER detection radius (more eager to avoid)
+                // Scale from 0.01 (1km - ultra-sensitive) to 0.005 (500m - less sensitive)
+                // But ALWAYS use at least 0.015 (1.5km) to catch zones!
+                let detectionRadius = 0.02 - (noiseTolerance / 100) * 0.01;
+                detectionRadius = Math.max(detectionRadius, 0.015); // Minimum 1.5km
+                
+                console.log("🔊 Noise tolerance:", noiseTolerance, "→ Detection radius:", detectionRadius.toFixed(4), "km");
+
+                // 1. Fetch Standard Route (Direct)
+                console.log("📌 Fetching standard direct route...");
+                const standardRouteData = await getOSRMRoute([startCoords, endCoords]);
+
+                // 2. Fetch Safe Route (Iterative Solver) - with LARGE detection radius
+                console.log("🧭 Fetching safe route avoiding", obstacles.length, "zones with radius", detectionRadius.toFixed(4));
+                const safeRouteResult = await solveSafeRoute(startCoords, endCoords, obstacles);
+                const safeRouteData = safeRouteResult ? safeRouteResult.route : null;
+                const usedWaypoints = safeRouteResult ? safeRouteResult.waypoints : [];
+
+                // Draw Routes
+                if (standardRouteData) {
+                    L.geoJSON(standardRouteData.geometry, {
+                        style: {
+                            color: '#9CA3AF',
+                            weight: 3,
+                            dashArray: '5, 8',
+                            opacity: 0.5
+                        }
+                    }).addTo(routeLayer);
+                }
+
+                if (safeRouteData) {
+                    const safePoly = L.geoJSON(safeRouteData.geometry, {
+                        style: {
+                            color: '#0EA5A2',
+                            weight: 7,
+                            opacity: 1,
+                            lineJoin: 'round'
+                        }
+                    }).addTo(routeLayer);
+
+                    // Fit to safe route
+                    if (map && !isDemo) {
+                        map.fitBounds(safePoly.getBounds(), { padding: [50, 50] });
+                    }
+
+                    // Update Stats
+                    if (stats) {
+                        const dist = (safeRouteData.distance / 1000).toFixed(1);
+                        const dur = Math.round(safeRouteData.duration / 60);
+                        document.getElementById('routeDistance').textContent = `${dist} km Rivo Route (${dur} min)`;
+                        document.getElementById('quietness').textContent = 'Verified Quiet Path';
+                        stats.classList.remove('hidden');
+                    }
+
+                    const detourCount = usedWaypoints.length - 2;
+                    const alertText = document.getElementById('alertText');
+                    if (alertText) {
+                        if (detourCount > 0) {
+                            alertText.textContent = `Re-routed to avoid ${detourCount} noise zones.`;
+                        } else {
+                            alertText.textContent = 'Direct path is safe.';
+                        }
+                    }
+                } else {
+                    console.warn("Could not calculate safe route.");
+                }
+
+                if (alertBox && !isDemo) {
+                    alertBox.classList.remove('hidden');
+                    alertBox.style.opacity = '1';
+                    setTimeout(() => {
+                        alertBox.style.opacity = '0';
+                        setTimeout(() => alertBox.classList.add('hidden'), 500);
+                    }, 4000);
+                }
+
+            } catch (err) {
+                console.error("Error calculating route:", err);
+            } finally {
+                isCalculating = false;
+                resetBtn();
+            }
+
+            function resetBtn() {
+                if (btn) {
+                    btn.disabled = false;
+                    btnText.innerText = originalText;
+                    btnIcon.className = "fa-solid fa-wand-magic-sparkles group-hover:rotate-12 transition-transform";
+                }
+            }
+        }
+
+        function initControls() {
+            const btn = document.getElementById('findRouteBtn');
+            if (!btn) {
+                console.error('Find Route button not found');
+                return;
+            }
+
+            // --- Swap Locations Button ---
+            const swapBtn = document.getElementById('swapLocationsBtn');
+            console.log('Swap button found:', swapBtn);
+            if (swapBtn) {
+                swapBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    console.log('Swap button clicked!');
+                    
+                    const startInput = document.getElementById('startInput');
+                    const endInput = document.getElementById('endInput');
+                    
+                    // Swap text values
+                    const tempText = startInput.value;
+                    startInput.value = endInput.value;
+                    endInput.value = tempText;
+                    
+                    // Swap coordinates
+                    const tempCoords = [...startCoords];
+                    startCoords = [...endCoords];
+                    endCoords = tempCoords;
+                    
+                    // Update markers on map
+                    if (startMarker && endMarker) {
+                        startMarker.setLatLng([startCoords[1], startCoords[0]]);
+                        endMarker.setLatLng([endCoords[1], endCoords[0]]);
+                    }
+                    
+                    // Animate the button
+                    swapBtn.style.transform = 'rotate(180deg)';
+                    setTimeout(() => swapBtn.style.transform = '', 300);
+                });
+            }
+
+            // --- Locate End Button (Current Location for Destination) ---
+            const locateEndBtn = document.getElementById('locateEndBtn');
+            if (locateEndBtn) {
+                locateEndBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    console.log('🎯 Locate End button clicked');
+                    
+                    if (!navigator.geolocation) {
+                        alert("Geolocation is not supported by this browser.");
+                        return;
+                    }
+                    
+                    // Check if running on HTTPS or localhost
+                    if (location.protocol !== 'https:' && location.hostname !== 'localhost' && location.hostname !== '127.0.0.1') {
+                        console.warn('⚠️ Geolocation requires HTTPS');
+                        alert('Geolocation requires a secure connection (HTTPS). Please access this site via HTTPS.');
+                        return;
+                    }
+
+                    const endInput = document.getElementById('endInput');
+                    const originalIcon = locateEndBtn.innerHTML;
+                    locateEndBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+                    endInput.value = "Locating...";
+
+                    navigator.geolocation.getCurrentPosition(
+                        async (position) => {
+                            const lat = position.coords.latitude;
+                            const lng = position.coords.longitude;
+                            endCoords = [lng, lat];
+
+                            // Reverse geocode to get address
+                            try {
+                                const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
+                                const data = await response.json();
+                                endInput.value = data.display_name || `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+                            } catch (error) {
+                                endInput.value = `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+                            }
+
+                            if (endMarker) {
+                                endMarker.setLatLng([lat, lng]);
+                            }
+                            
+                            locateEndBtn.innerHTML = originalIcon;
+                        },
+                        (error) => {
+                            locateEndBtn.innerHTML = originalIcon;
+                            alert("Unable to retrieve your location: " + error.message);
+                        },
+                        { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+                    );
+                });
+            }
+
+            const btnText = btn.querySelector('span');
+            const btnIcon = btn.querySelector('i');
+            const alertEl = document.getElementById('gentleAlert');
+            const stats = document.getElementById('routeStats');
+            const noiseSlider = document.getElementById('noiseSlider');
+            const noiseValue = document.getElementById('noiseValue');
+            const toggleCrowds = document.getElementById('toggle-crowds');
+            const toggleConst = document.getElementById('toggle-const');
+            
+            // Safari fix: Add click handlers to toggle containers
+            const addToggleHandler = (checkboxId) => {
+                const checkbox = document.getElementById(checkboxId);
+                if (!checkbox) {
+                    console.error('Checkbox not found:', checkboxId);
+                    return;
+                }
+                
+                // Set initial checked state
+                checkbox.checked = true;
+                console.log('✓ Initialized', checkboxId, 'checked:', checkbox.checked);
+                
+                const container = checkbox.closest('.toggle-container');
+                if (!container) {
+                    console.error('Container not found for', checkboxId);
+                    return;
+                }
+                
+                // Direct checkbox click
+                checkbox.addEventListener('change', (e) => {
+                    console.log('✓ Change event:', checkboxId, '→', checkbox.checked);
+                });
+                
+                // Container/label click fallback for Safari
+                container.addEventListener('click', (e) => {
+                    if (e.target === checkbox) return; // Let native click work
+                    console.log('✓ Container click on', checkboxId);
+                    checkbox.checked = !checkbox.checked;
+                    checkbox.dispatchEvent(new Event('change', { bubbles: true }));
+                    console.log('  Toggled to:', checkbox.checked);
+                });
+            };
+            
+            addToggleHandler('toggle-crowds');
+            addToggleHandler('toggle-const');
+            addToggleHandler('toggle-traffic');
+            
+            console.log('✓ All toggles initialized');
+
+            if (noiseSlider && noiseValue) {
+                noiseSlider.addEventListener('input', (e) => {
+                    const value = e.target.value;
+                    const labels = ['Silent', 'Quiet Priority', 'Moderate', 'Lively OK'];
+                    const index = Math.min(Math.floor(value / 25), 3);
+                    noiseValue.textContent = labels[index];
+                });
+            }
+
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                console.log('Find Route button clicked');
+                calculateAndDisplayRoute(false);
+            });
+
+            // --- Demo: Clear Zones ---
+            const clearZonesBtn = document.getElementById('clearZonesBtn');
+            if (clearZonesBtn) {
+                clearZonesBtn.addEventListener('click', () => {
+                    // Clear user-added zones from localStorage
+                    userNoiseZones = [];
+                    localStorage.removeItem('rivoUserNoiseZones');
+                    console.log("🗑️ Cleared all saved noise zones from localStorage");
+                    
+                    globalNoiseZones = [];
+                    globalConstructionZones = [];
+                    globalCrowdZones = [];
+                    if (noiseLayer) noiseLayer.clearLayers();
+                    if (constructionLayer) constructionLayer.clearLayers();
+                    if (crowdLayer) crowdLayer.clearLayers();
+                    if (routeLayer) routeLayer.clearLayers();
+
+                    // Reset to standard route
+                    calculateAndDisplayRoute(true);
+                });
+            }
+
+            // --- Demo: Add Noise Mode ---
+            const addNoiseBtn = document.getElementById('addNoiseBtn');
+            const demoHint = document.getElementById('demoModeHint');
+            let isAddingNoise = false;
+
+            addNoiseBtn.addEventListener('click', () => {
+                isAddingNoise = !isAddingNoise;
+                if (isAddingNoise) {
+                    addNoiseBtn.classList.replace('bg-gray-100', 'bg-orange-100');
+                    addNoiseBtn.classList.replace('text-gray-700', 'text-orange-700');
+                    demoHint.classList.remove('hidden');
+                    document.getElementById('map').style.cursor = 'crosshair';
+                } else {
+                    addNoiseBtn.classList.replace('bg-orange-100', 'bg-gray-100');
+                    addNoiseBtn.classList.replace('text-orange-700', 'text-gray-700');
+                    demoHint.classList.add('hidden');
+                    document.getElementById('map').style.cursor = '';
+                }
+            });
+
+            // Traffic Toggle - Using FREE OpenStreetMap transport layer
+            const toggleTraffic = document.getElementById('toggle-traffic');
+            if (toggleTraffic) {
+                // Create traffic layer using OpenStreetMap's free transport tiles
+                if (!trafficLayer) {
+                    // Using Carto's free tiles with transport styling
+                    trafficLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+                        opacity: 0.7,
+                        attribution: '&copy; <a href="https://carto.com/">CARTO</a>',
+                        maxZoom: 19,
+                        subdomains: 'abcd'
+                    });
+                }
+                // Don't add automatically - let user enable it
+                
+                toggleTraffic.addEventListener('change', (e) => {
+                    if (e.target.checked) {
+                        console.log('✓ Traffic overlay enabled');
+                        trafficLayer.addTo(map);
+                    } else {
+                        console.log('✗ Traffic overlay disabled');
+                        if (trafficLayer) {
+                            map.removeLayer(trafficLayer);
+                        }
+                    }
+                });
+            }
+
+            map.on('click', async (e) => {
+                if (!isAddingNoise || isCalculating) return;
+
+                const { lat, lng } = e.latlng;
+                const coords = [lng, lat]; // Store internally as Lng, Lat
+                const timestamp = Date.now();
+
+                console.log("🔴 NOISE ZONE ADDED at:", coords);
+
+                // 1. Add to global zones for route calculation
+                globalNoiseZones.push(coords);
+                
+                // 2. Add to user zones with timestamp (for expiry)
+                userNoiseZones.push({ coords, timestamp });
+                
+                // 3. Save to localStorage immediately
+                saveNoiseZones();
+                console.log("💾 Saved to localStorage! Total user zones:", userNoiseZones.length);
+                console.log("⏰ Will auto-expire in 5 minutes");
+
+                // 4. Visually add to map with expiry timer
+                addUserNoiseMarkerWithExpiry(lat, lng, timestamp);
+
+                console.log("Total noise zones now:", globalNoiseZones.length);
+
+                // 5. FORCE recalculation with visual feedback
+                const alertEl = document.getElementById('gentleAlert');
+                const alertText = document.getElementById('alertText');
+                
+                if (alertEl && alertText) {
+                    alertText.textContent = '🔴 Noise added! Expires in 5 min. Recalculating...';
+                    alertEl.classList.remove('hidden');
+                }
+
+                // 6. Wait a tiny bit for user to see the circle, then recalculate FAST
+                setTimeout(async () => {
+                    isCalculating = true;
+                    try {
+                        await calculateAndDisplayRoute(true);
+                        
+                        if (alertText) {
+                            alertText.textContent = '✅ Route updated! Noise zone expires in 5 min.';
+                        }
+                        
+                        setTimeout(() => {
+                            if (alertEl) alertEl.classList.add('hidden');
+                        }, 3000);
+                    } finally {
+                        isCalculating = false;
+                    }
+                }, 100);
+            });
+        }
+    </script>
+
+    <!-- Harbor Chatbot Widget -->
+    <script src="chatbot-widget.js"></script>
+</body>
+
+</html>

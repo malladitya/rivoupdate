@@ -1,0 +1,22 @@
+{
+  "name": "rivo-navigation",
+  "version": "1.0.0",
+  "description": "Sensory-friendly navigation app",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5"
+  },
+  "keywords": [
+    "navigation",
+    "sensory",
+    "vision-api",
+    "autism"
+  ],
+  "author": "",
+  "license": "ISC"
+}

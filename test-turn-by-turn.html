@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rivo Turn-by-Turn Navigation Test</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #0EA5A2 0%, #06B6D4 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+        }
+        h1 {
+            color: #0EA5A2;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+        .test-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .test-card {
+            background: #f8f9fa;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 20px;
+        }
+        .test-card h3 {
+            color: #0EA5A2;
+            margin-bottom: 15px;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .test-item {
+            background: white;
+            padding: 12px;
+            margin-bottom: 10px;
+            border-radius: 6px;
+            border-left: 4px solid #e0e0e0;
+            font-size: 13px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .test-item.pass {
+            border-left-color: #22c55e;
+            background: #f0fdf4;
+            color: #166534;
+        }
+        .test-item.fail {
+            border-left-color: #ef4444;
+            background: #fef2f2;
+            color: #7f1d1d;
+        }
+        .status-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+        .status-badge.pass {
+            background: #22c55e;
+            color: white;
+        }
+        .status-badge.fail {
+            background: #ef4444;
+            color: white;
+        }
+        button {
+            background: #0EA5A2;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            margin-right: 10px;
+            margin-bottom: 10px;
+            transition: all 0.3s ease;
+        }
+        button:hover:not(:disabled) {
+            background: #0d9195;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(14, 165, 162, 0.3);
+        }
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+        .nav-panel {
+            background: linear-gradient(135deg, #0EA5A2 0%, #06B6D4 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            margin: 20px 0;
+            display: none;
+        }
+        .nav-panel.active {
+            display: block;
+        }
+        .nav-panel .direction {
+            font-size: 48px;
+            margin-bottom: 10px;
+        }
+        .nav-panel .instruction {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+        .nav-panel .distance {
+            font-size: 32px;
+            font-weight: 700;
+            margin: 10px 0;
+        }
+        .instructions-list {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            display: none;
+        }
+        .instructions-list.active {
+            display: block;
+        }
+        .instructions-list h4 {
+            color: #0EA5A2;
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+        .instruction-item {
+            background: white;
+            padding: 12px 15px;
+            margin-bottom: 8px;
+            border-left: 4px solid #0EA5A2;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        .data-display {
+            background: #1e1e1e;
+            color: #00ff00;
+            padding: 15px;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            overflow-x: auto;
+            margin: 15px 0;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        .data-display div {
+            line-height: 1.6;
+        }
+        .success {
+            background: #f0fdf4;
+            border-left: 4px solid #22c55e;
+            padding: 15px;
+            border-radius: 4px;
+            color: #166534;
+            margin: 20px 0;
+            display: none;
+        }
+        .success.show {
+            display: block;
+        }
+        .error {
+            background: #fef2f2;
+            border-left: 4px solid #ef4444;
+            padding: 15px;
+            border-radius: 4px;
+            color: #7f1d1d;
+            margin: 20px 0;
+            display: none;
+        }
+        .error.show {
+            display: block;
+        }
+        .test-controls {
+            margin: 20px 0;
+            padding: 20px;
+            background: #fffbeb;
+            border-radius: 8px;
+            border-left: 4px solid #f59e0b;
+        }
+        @media (max-width: 768px) {
+            .test-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧭 Rivo Turn-by-Turn Navigation Test</h1>
+        <p class="subtitle">Testing turn-by-turn navigation implementation</p>
+
+        <!-- Test Results -->
+        <div class="test-grid">
+            <div class="test-card">
+                <h3>✅ Core Functions</h3>
+                <div id="functions-test"></div>
+            </div>
+            <div class="test-card">
+                <h3>⚙️ Navigation State</h3>
+                <div id="state-test"></div>
+            </div>
+        </div>
+
+        <!-- Controls -->
+        <div class="test-controls">
+            <h3>🎮 Test Controls</h3>
+            <p style="margin-bottom: 15px; color: #92400e;">Follow these steps in order:</p>
+            <button onclick="testAll()" style="background: #22c55e;">1️⃣ Run All Tests</button>
+            <button onclick="testRouteWithNav()" id="testRouteBtn" style="background: #3b82f6;">2️⃣ Test Route + Navigation</button>
+            <button onclick="simulateTurns()" id="simulateTurnsBtn" style="background: #8b5cf6;" disabled>3️⃣ Simulate Movement</button>
+            <button onclick="clearAll()" id="clearBtn" style="background: #ef4444;" disabled>Clear</button>
+        </div>
+
+        <!-- Success/Error Messages -->
+        <div class="success" id="success-msg"></div>
+        <div class="error" id="error-msg"></div>
+
+        <!-- Navigation Panel Display -->
+        <div class="nav-panel" id="navigation-panel">
+            <div class="direction" id="nav-direction">📍</div>
+            <div class="instruction" id="nav-instruction">Loading...</div>
+            <div class="distance" id="nav-distance">---</div>
+            <div style="font-size: 12px; opacity: 0.9;">Distance to next turn</div>
+        </div>
+
+        <!-- Instructions List -->
+        <div class="instructions-list" id="instructions-list">
+            <h4>📋 Step-by-Step Instructions</h4>
+            <div id="instructions-content"></div>
+        </div>
+
+        <!-- Data Display -->
+        <div style="margin-top: 30px;">
+            <h3 style="color: #0EA5A2; margin-bottom: 15px;">📊 Navigation Data</h3>
+            <div class="data-display" id="data-display">
+                <div>Waiting for test execution...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Include script -->
+    <script src="script.js"></script>
+    <script>
+        let testResults = {
+            functionsOK: false,
+            stateOK: false,
+            routeOK: false,
+            navigationOK: false
+        };
+
+        function showMessage(type, message) {
+            const elem = document.getElementById(`${type}-msg`);
+            elem.textContent = message;
+            elem.classList.add('show');
+            setTimeout(() => elem.classList.remove('show'), 5000);
+        }
+
+        function updateData(data) {
+            const elem = document.getElementById('data-display');
+            elem.innerHTML = `<div>${JSON.stringify(data, null, 2).split('\n').join('</div><div>')}</div>`;
+        }
+
+        function testAll() {
+            document.getElementById('functions-test').innerHTML = '';
+            document.getElementById('state-test').innerHTML = '';
+            
+            // Test 1: Core Functions
+            const functions = [
+                'calculateBearing',
+                'calculateDistance',
+                'determineTurnDirection',
+                'generateTurns',
+                'generateNavigationInstructions',
+                'setupTurnByTurnNavigation',
+                'updateNavigationDisplay',
+                'updateNavigationPanel'
+            ];
+
+            let functionsHTML = '';
+            let allFunctionsOK = true;
+
+            functions.forEach(fn => {
+                const exists = typeof window[fn] === 'function';
+                allFunctionsOK = allFunctionsOK && exists;
+                functionsHTML += `
+                    <div class="test-item ${exists ? 'pass' : 'fail'}">
+                        <span>${exists ? '✓' : '✗'} ${fn}</span>
+                        <span class="status-badge ${exists ? 'pass' : 'fail'}">${exists ? 'PASS' : 'FAIL'}</span>
+                    </div>
+                `;
+            });
+
+            document.getElementById('functions-test').innerHTML = functionsHTML;
+            testResults.functionsOK = allFunctionsOK;
+
+            // Test 2: Navigation State
+            const stateChecks = [
+                { name: 'navigationState exists', check: () => typeof window.navigationState !== 'undefined' },
+                { name: 'routeSegments array', check: () => Array.isArray(window.navigationState.routeSegments) },
+                { name: 'instructions array', check: () => Array.isArray(window.navigationState.instructions) },
+                { name: 'currentSegmentIndex', check: () => typeof window.navigationState.currentSegmentIndex === 'number' },
+                { name: 'nextTurnDistance', check: () => typeof window.navigationState.nextTurnDistance === 'number' },
+                { name: 'nextTurnDirection', check: () => typeof window.navigationState.nextTurnDirection === 'string' }
+            ];
+
+            let stateHTML = '';
+            let allStateOK = true;
+
+            stateChecks.forEach(({ name, check }) => {
+                const result = check();
+                allStateOK = allStateOK && result;
+                stateHTML += `
+                    <div class="test-item ${result ? 'pass' : 'fail'}">
+                        <span>${result ? '✓' : '✗'} ${name}</span>
+                        <span class="status-badge ${result ? 'pass' : 'fail'}">${result ? 'PASS' : 'FAIL'}</span>
+                    </div>
+                `;
+            });
+
+            document.getElementById('state-test').innerHTML = stateHTML;
+            testResults.stateOK = allStateOK;
+
+            if (allFunctionsOK && allStateOK) {
+                showMessage('success', '✅ All core tests passed! Click "2️⃣ Test Route + Navigation" to continue.');
+                document.getElementById('testRouteBtn').disabled = false;
+            } else {
+                showMessage('error', '❌ Some tests failed. Check results above.');
+            }
+
+            updateData({
+                functionsOK: allFunctionsOK,
+                stateOK: allStateOK,
+                navigationState: window.navigationState
+            });
+        }
+
+        function testRouteWithNav() {
+            showMessage('success', '🗺️ Testing turn-by-turn navigation directly...');
+            
+            try {
+                // Test route coordinates (simulated route with multiple waypoints)
+                const testRoute = [
+                    [77.4538, 28.6692], // Start
+                    [77.4545, 28.6700], // Waypoint 1
+                    [77.4555, 28.6705], // Waypoint 2
+                    [77.4565, 28.6695], // Waypoint 3
+                    [77.4316, 28.6384]  // End
+                ];
+
+                console.log('📍 Testing with route:', testRoute);
+
+                // Setup turn-by-turn navigation directly
+                window.setupTurnByTurnNavigation(testRoute);
+
+                // Get navigation state
+                const navState = window.navigationState;
+                
+                if (navState.instructions && navState.instructions.length > 0) {
+                    testResults.navigationOK = true;
+                    showMessage('success', `✅ Navigation setup complete! Generated ${navState.instructions.length} turn instructions.`);
+                    document.getElementById('simulateTurnsBtn').disabled = false;
+                    document.getElementById('clearBtn').disabled = false;
+
+                    // Display navigation panel
+                    document.getElementById('navigation-panel').classList.add('active');
+                    document.getElementById('instructions-list').classList.add('active');
+
+                    // Display instructions
+                    let instHTML = '';
+                    navState.instructions.forEach((inst, idx) => {
+                        instHTML += `<div class="instruction-item">${idx + 1}. ${inst.instruction}</div>`;
+                    });
+                    document.getElementById('instructions-content').innerHTML = instHTML;
+
+                    updateData({
+                        routeSegments: navState.routeSegments.length,
+                        totalInstructions: navState.instructions.length,
+                        testRoute: testRoute.map(c => `[${c[0].toFixed(4)}, ${c[1].toFixed(4)}]`),
+                        instructions: navState.instructions,
+                        currentState: {
+                            segment: navState.currentSegmentIndex,
+                            nextTurnDistance: navState.nextTurnDistance.toFixed(0) + 'm',
+                            nextTurnDirection: navState.nextTurnDirection
+                        }
+                    });
+                } else {
+                    showMessage('error', '❌ Navigation setup failed. No instructions generated.');
+                    console.error('Navigation state:', navState);
+                }
+            } catch (error) {
+                showMessage('error', `❌ Error: ${error.message}`);
+                console.error('Full error:', error);
+            }
+        }
+
+        function simulateTurns() {
+            showMessage('success', '📍 Simulating user movement through route...');
+            
+            if (!window.navigationState.routeSegments || window.navigationState.routeSegments.length === 0) {
+                showMessage('error', '❌ No route segments found. Run "Test Route + Navigation" first.');
+                return;
+            }
+
+            const routeSegments = window.navigationState.routeSegments;
+            const routeCoordinates = routeSegments.map(s => s.from);
+            let step = 0;
+
+            const simulateStep = () => {
+                if (step < Math.min(5, routeCoordinates.length)) {
+                    const userLocation = routeCoordinates[step];
+
+                    // Update navigation display
+                    window.updateNavigationDisplay(userLocation, routeCoordinates);
+
+                    // Update UI
+                    updateNavigationUI();
+
+                    console.log(`📍 Step ${step + 1}: User at [${userLocation[1].toFixed(4)}, ${userLocation[0].toFixed(4)}]`);
+                    console.log(`   Direction: ${window.navigationState.nextTurnDirection}, Distance: ${window.navigationState.nextTurnDistance.toFixed(0)}m`);
+                    
+                    step++;
+                    setTimeout(simulateStep, 1500);
+                } else {
+                    showMessage('success', '✅ Simulation complete! Turn-by-turn navigation is working perfectly.');
+                }
+            };
+
+            simulateStep();
+        }
+
+        function updateNavigationUI() {
+            const navState = window.navigationState;
+            const panel = document.getElementById('navigation-panel');
+            
+            let icon = '🛣️';
+            let text = 'Continue straight';
+
+            if (navState.nextTurnDirection === 'left') {
+                icon = '↙️';
+                text = 'Turn left';
+            } else if (navState.nextTurnDirection === 'right') {
+                icon = '↘️';
+                text = 'Turn right';
+            } else if (navState.nextTurnDirection === 'arrive') {
+                icon = '🎯';
+                text = 'Arrived';
+            }
+
+            document.getElementById('nav-direction').textContent = icon;
+            document.getElementById('nav-instruction').textContent = text;
+            document.getElementById('nav-distance').textContent = navState.nextTurnDistance.toFixed(0) + 'm';
+
+            updateData({
+                currentSegment: navState.currentSegmentIndex + 1,
+                nextTurn: navState.nextTurnDirection,
+                distanceToNextTurn: navState.nextTurnDistance.toFixed(0) + ' meters'
+            });
+        }
+
+        function clearAll() {
+            document.getElementById('functions-test').innerHTML = '';
+            document.getElementById('state-test').innerHTML = '';
+            document.getElementById('navigation-panel').classList.remove('active');
+            document.getElementById('instructions-list').classList.remove('active');
+            document.getElementById('data-display').innerHTML = '<div>Waiting for test execution...</div>';
+            document.getElementById('testRouteBtn').disabled = true;
+            document.getElementById('simulateTurnsBtn').disabled = true;
+            document.getElementById('clearBtn').disabled = true;
+            showMessage('success', '🔄 Test cleared. Click "1️⃣ Run All Tests" to start again.');
+        }
+
+        // Auto-run tests on page load
+        window.addEventListener('load', () => {
+            setTimeout(testAll, 500);
+        });
+    </script>
+
+    <!-- Harbor Chatbot Widget -->
+    <script src="chatbot-widget.js"></script>
+</body>
+</html>

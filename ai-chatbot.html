@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Harbor - AI Navigation Assistant</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #0EA5A2 0%, #06B6D4 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .chatbot-container {
+            width: 100%;
+            max-width: 800px;
+            height: 600px;
+            background: white;
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        .chatbot-header {
+            background: linear-gradient(135deg, #0EA5A2 0%, #06B6D4 100%);
+            color: white;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .chatbot-header h1 {
+            font-size: 20px;
+            flex: 1;
+            margin: 0;
+        }
+
+        .chatbot-header .status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+        }
+
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            background: #22c55e;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.5;
+            }
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            background: #f8f9fa;
+        }
+
+        .chat-message {
+            display: flex;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .chat-message.user {
+            justify-content: flex-end;
+        }
+
+        .chat-message.assistant {
+            justify-content: flex-start;
+        }
+
+        .message-bubble {
+            max-width: 70%;
+            padding: 12px 16px;
+            border-radius: 12px;
+            word-wrap: break-word;
+            line-height: 1.5;
+            font-size: 14px;
+        }
+
+        .user .message-bubble {
+            background: linear-gradient(135deg, #0EA5A2 0%, #06B6D4 100%);
+            color: white;
+            border-bottom-right-radius: 4px;
+        }
+
+        .assistant .message-bubble {
+            background: white;
+            color: #333;
+            border: 1px solid #e0e0e0;
+            border-bottom-left-radius: 4px;
+        }
+
+        .chat-input-container {
+            padding: 15px 20px;
+            background: white;
+            border-top: 1px solid #e0e0e0;
+            display: flex;
+            gap: 10px;
+        }
+
+        #chat-input {
+            flex: 1;
+            border: 1px solid #e0e0e0;
+            border-radius: 24px;
+            padding: 12px 18px;
+            font-family: 'Poppins', sans-serif;
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        #chat-input:focus {
+            border-color: #0EA5A2;
+        }
+
+        .send-btn {
+            background: linear-gradient(135deg, #0EA5A2 0%, #06B6D4 100%);
+            color: white;
+            border: none;
+            border-radius: 24px;
+            padding: 12px 24px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .send-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(14, 165, 162, 0.3);
+        }
+
+        .send-btn:active {
+            transform: translateY(0);
+        }
+
+        .quick-actions {
+            padding: 10px 20px;
+            background: white;
+            border-top: 1px solid #e0e0e0;
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            overflow-x: auto;
+        }
+
+        .quick-action-btn {
+            background: #f0f0f0;
+            border: 1px solid #e0e0e0;
+            padding: 8px 12px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 12px;
+            white-space: nowrap;
+            transition: all 0.3s;
+        }
+
+        .quick-action-btn:hover {
+            background: #0EA5A2;
+            color: white;
+            border-color: #0EA5A2;
+        }
+
+        .info-panel {
+            padding: 15px 20px;
+            background: #f0fdf4;
+            border-top: 1px solid #e0e0e0;
+            display: none;
+            font-size: 12px;
+            color: #166534;
+        }
+
+        .info-panel.show {
+            display: block;
+        }
+
+        .info-item {
+            margin: 5px 0;
+        }
+
+        .info-label {
+            font-weight: 600;
+            color: #0EA5A2;
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #0EA5A2;
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #0d9195;
+        }
+
+        @media (max-width: 600px) {
+            .chatbot-container {
+                height: 100vh;
+                max-width: 100%;
+                border-radius: 0;
+            }
+
+            .message-bubble {
+                max-width: 85%;
+                font-size: 13px;
+                padding: 10px 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="chatbot-container">
+        <!-- Header -->
+        <div class="chatbot-header">
+            <div style="display: flex; align-items: center; gap: 12px; flex: 1;">
+                <div style="font-size: 28px;">⚓</div>
+                <div>
+                    <h1>Harbor</h1>
+                    <p style="font-size: 11px; opacity: 0.9; margin: 2px 0;">AI Navigation Assistant</p>
+                </div>
+            </div>
+            <div class="status">
+                <span class="status-dot"></span>
+                <span>Online</span>
+            </div>
+        </div>
+
+        <!-- Chat Messages -->
+        <div class="chat-messages" id="chat-messages">
+            <div class="chat-message assistant">
+                <div class="message-bubble">
+                    👋 Welcome to Harbor!<br><br>
+                    Your intelligent AI navigation guide. I can:<br>
+                    • Set your location and destination<br>
+                    • Suggest sensory-friendly routes<br>
+                    • Turn-by-turn navigation<br>
+                    • Answer navigation questions<br><br>
+                    Try saying: "Take me to Delhi" or "Suggest routes"
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="quick-actions">
+            <button class="quick-action-btn" onclick="suggestRoute()">📍 Suggest Route</button>
+            <button class="quick-action-btn" onclick="setDestinationDemo()">🎯 Set Destination</button>
+            <button class="quick-action-btn" onclick="showHelp()">❓ Help</button>
+            <button class="quick-action-btn" onclick="clearChat()">🔄 Clear</button>
+        </div>
+
+        <!-- Info Panel -->
+        <div class="info-panel" id="info-panel">
+            <div class="info-item">
+                <span class="info-label">📍 Current Location:</span> <span id="info-location">Not set</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">🎯 Destination:</span> <span id="info-destination">Not set</span>
+            </div>
+        </div>
+
+        <!-- Chat Input -->
+        <div class="chat-input-container">
+            <input 
+                type="text" 
+                id="chat-input" 
+                placeholder="Type your message or location..." 
+                onkeypress="handleKeyPress(event)"
+            >
+            <button class="send-btn" onclick="sendMessage()">
+                ➤
+            </button>
+        </div>
+    </div>
+
+    <script src="ai-nlp-engine.js"></script>
+    <script src="ai-action-handler.js"></script>
+    <script src="script.js"></script>
+    <script>
+        // Initialize chat
+        function initChat() {
+            const chatInput = document.getElementById('chat-input');
+            chatInput.focus();
+            addWelcomeMessage();
+        }
+
+        function addWelcomeMessage() {
+            const messagesDiv = document.getElementById('chat-messages');
+            const msgDiv = document.createElement('div');
+            msgDiv.className = 'chat-message assistant';
+            msgDiv.innerHTML = `<div class="message-bubble">⚓ Harbor is ready! Try: "Take me to Delhi" or "Where am I?"</div>`;
+            messagesDiv.appendChild(msgDiv);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
+
+        function sendMessage() {
+            const chatInput = document.getElementById('chat-input');
+            const message = chatInput.value.trim();
+            
+            if (!message) return;
+
+            // Add user message to UI
+            const messagesDiv = document.getElementById('chat-messages');
+            const userMsgDiv = document.createElement('div');
+            userMsgDiv.className = 'chat-message user';
+            userMsgDiv.innerHTML = `<div class="message-bubble">${escapeHtml(message)}</div>`;
+            messagesDiv.appendChild(userMsgDiv);
+
+            // Get AI response
+            const result = window.getAIResponse(message);
+
+            // Add assistant message
+            const assistantMsgDiv = document.createElement('div');
+            assistantMsgDiv.className = 'chat-message assistant';
+            assistantMsgDiv.innerHTML = `<div class="message-bubble">${escapeHtml(result.response)}</div>`;
+            messagesDiv.appendChild(assistantMsgDiv);
+
+            // Update info panel
+            updateInfoPanel(result);
+
+            // Clear input
+            chatInput.value = '';
+            chatInput.focus();
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+
+            console.log('💬 Response:', result);
+        }
+
+        function handleKeyPress(event) {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+        }
+
+        function updateInfoPanel(result) {
+            const panel = document.getElementById('info-panel');
+            const locSpan = document.getElementById('info-location');
+            const destSpan = document.getElementById('info-destination');
+
+            if (result.currentLocation) {
+                locSpan.textContent = `[${result.currentLocation[0].toFixed(4)}, ${result.currentLocation[1].toFixed(4)}]`;
+                panel.classList.add('show');
+            }
+
+            if (result.currentDestination) {
+                destSpan.textContent = `[${result.currentDestination[0].toFixed(4)}, ${result.currentDestination[1].toFixed(4)}]`;
+                panel.classList.add('show');
+            }
+        }
+
+        function suggestRoute() {
+            const input = document.getElementById('chat-input');
+            input.value = 'Suggest routes';
+            sendMessage();
+        }
+
+        function setDestinationDemo() {
+            const input = document.getElementById('chat-input');
+            input.value = 'Take me to Delhi';
+            sendMessage();
+        }
+
+        function showHelp() {
+            const input = document.getElementById('chat-input');
+            input.value = 'Help';
+            sendMessage();
+        }
+
+        function clearChat() {
+            const messagesDiv = document.getElementById('chat-messages');
+            messagesDiv.innerHTML = `<div class="chat-message assistant">
+                <div class="message-bubble">Chat cleared! 🔄 Ready for new navigation. What can I help you with?</div>
+            </div>`;
+            document.getElementById('chat-input').value = '';
+            document.getElementById('chat-input').focus();
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Initialize on page load
+        window.addEventListener('load', initChat);
+    </script>
+</body>
+</html>

@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Rivo Navigation</title>
+    <meta name="description"
+        content="Rivo Navigation helps people with autism and sensory sensitivities find quiet, comfortable routes in cities using AI and community reports." />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Open+Sans:wght@400;600&display=swap"
+        rel="stylesheet">
+
+
+    <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+    <a class="skip-link" href="#main">Skip to main content</a>
+
+    <header class="site-header">
+        <div class="container header-inner">
+            <a class="logo" href="#home" aria-label="Rivo Navigation home">
+                <img src="logo1.png" alt="Rivo Logo" width="50" height="50" style="border-radius: 8px;">
+                <span class="brand-name">Rivo</span>
+            </a>
+
+            <button class="nav-toggle" aria-controls="primary-nav" aria-expanded="false">
+                <span class="nav-toggle__bars" aria-hidden="true"></span>
+                <span class="sr-only">Toggle navigation</span>
+            </button>
+
+            <nav id="primary-nav" class="site-nav" aria-label="Primary">
+                <ul class="nav-list">
+                    <li><a href="#home">Home</a></li>
+                    <li><a href="#problem">Problem</a></li>
+                    <li><a href="#features">Features</a></li>
+                    <li><a href="#demo">Demo</a></li>
+                    <li><a href="#contact">Contact</a></li>
+                </ul>
+                <a class="btn btn--primary btn--sm" href="#demo">Try the App</a>
+            </nav>
+        </div>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Rivo - Navigate with Peace (Azure Maps)</title>
+
+        <!-- Fonts -->
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link
+            href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
+            rel="stylesheet">
+
+        <!-- Icons -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+        <!-- Azure Maps Web SDK -->
+        <link rel="stylesheet" href="https://atlas.microsoft.com/sdk/javascript/mapcontrol/3/atlas.min.css"
+            type="text/css" />
+        <script src="https://atlas.microsoft.com/sdk/javascript/mapcontrol/3/atlas.min.js"></script>
+
+        <!-- Tailwind CSS -->
+        <script src="https://cdn.tailwindcss.com"></script>
+
+        <script>
+            tailwind.config = {
+                theme: {
+                    extend: {
+                        colors: {
+                            Rivo: {
+                                50: '#F0F9F9',
+                                100: '#Ddf2f2',
+                                200: '#Bce3e3',
+                                300: '#90cece',
+                                400: '#5FB3B3',
+                                500: '#3D9696',
+                                600: '#307878',
+                                700: '#286060',
+                                800: '#254E4E',
+                                900: '#214141',
+                            },
+                            sand: {
+                                50: '#FCFAF7',
+                                100: '#F7F3EB',
+                                200: '#EFE6D6',
+                            }
+                        },
+                        fontFamily: {
+                            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                            heading: ['"Outfit"', 'sans-serif'],
+                        },
+                        boxShadow: {
+                            'soft': '0 10px 40px -10px rgba(61, 150, 150, 0.15)',
+                            'card': '0 4px 6px -1px rgba(0, 0, 0, 0.02), 0 2px 4px -1px rgba(0, 0, 0, 0.02)',
+                        }
+                    }
+                }
+            }
+        </script>
+
+        <style>
+            body {
+                background-color: #FCFAF7;
+                color: #214141;
+                -webkit-font-smoothing: antialiased;
+                overflow-x: hidden;
+            }
+
+            *:focus-visible {
+                outline: 2px solid #3D9696;
+                outline-offset: 2px;
+            }
+
+            .skip-link {
+                position: absolute;
+                top: -40px;
+                left: 0;
+                background: #3D9696;
+                color: white;
+                padding: 8px;
+                z-index: 9999;
+                transition: top 0.3s;
+            }
+
+            .skip-link:focus {
+                top: 0;
+            }
+
+            #map {
+                width: 100%;
+                height: 100%;
+                border-radius: 1rem;
+                z-index: 10;
+            }
+
+            .loader {
+                border: 3px solid #f3f3f3;
+                border-radius: 50%;
+                border-top: 3px solid #3D9696;
+                width: 24px;
+                height: 24px;
+                animation: spin 1s linear infinite;
+            }
+
+            @keyframes spin {
+                to {
+                    transform: rotate(360deg);
+                }
+            }
+
+            @keyframes pulse-soft {
+                0% {
+                    box-shadow: 0 0 0 0 rgba(61, 150, 150, 0.4);
+                }
+
+                70% {
+                    box-shadow: 0 0 0 10px rgba(61, 150, 150, 0);
+                }
+
+                100% {
+                    box-shadow: 0 0 0 0 rgba(61, 150, 150, 0);
+                }
+            }
+
+            .animate-pulse-soft {
+                animation: pulse-soft 2s infinite;
+            }
+
+            .toggle-container {
+                position: relative;
+                display: inline-block;
+                width: 40px;
+                height: 20px;
+            }
+
+            .toggle-checkbox {
+                opacity: 0;
+                width: 0;
+                height: 0;
+            }
+
+            .toggle-label {
+                position: absolute;
+                cursor: pointer;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background-color: #E5E7EB;
+                border-radius: 20px;
+                transition: 0.3s;
+            }
+
+            .toggle-container input:checked+.toggle-label {
+                background-color: #3D9696;
+            }
+
+            .toggle-slider {
+                position: absolute;
+                top: 2px;
+                left: 2px;
+                width: 16px;
+                height: 16px;
+                background-color: white;
+                border-radius: 50%;
+                transition: 0.3s;
+            }
+
+            .toggle-container input:checked+.toggle-label .toggle-slider {
+                transform: translateX(20px);
+            }
+
+            input[type="range"] {
+                -webkit-appearance: none;
+                appearance: none;
+                height: 6px;
+                background: #E5E7EB;
+                border-radius: 3px;
+                outline: none;
+            }
+
+            input[type="range"]::-webkit-slider-thumb {
+                -webkit-appearance: none;
+                appearance: none;
+                width: 20px;
+                height: 20px;
+                background: #3D9696;
+                border-radius: 50%;
+                cursor: pointer;
+                box-shadow: 0 2px 6px rgba(61, 150, 150, 0.3);
+            }
+        </style>
+    </header>
+
+    <main id="main">
+        <!-- Hero -->
+
+        <a href="#demo" class="skip-link focus:outline-none">Skip to main content</a>
+
+        <div class="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full -z-0 pointer-events-none opacity-50">
+            <div
+                class="absolute top-20 left-10 w-72 h-72 bg-Rivo-200 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-pulse-soft">
+            </div>
+            <div
+                class="absolute top-40 right-10 w-72 h-72 bg-sand-200 rounded-full mix-blend-multiply filter blur-3xl opacity-70">
+            </div>
+        </div>
+
+        <section id="demo" class="py-12 bg-white relative min-h-screen">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div
+                    class="bg-sand-50 rounded-3xl shadow-xl overflow-hidden border border-Rivo-100 flex flex-col lg:flex-row h-screen lg:h-[700px] max-h-[90vh]">
+
+                    <div
+                        class="w-full lg:w-1/3 p-6 lg:p-8 flex flex-col border-b lg:border-b-0 lg:border-r border-Rivo-100 bg-white z-20 overflow-y-auto">
+                        <h2 class="text-2xl lg:text-3xl font-heading font-bold text-Rivo-900 mb-6">Plan a Calm Route
+                        </h2>
+
+                        <div class="space-y-4 mb-6">
+                            <div class="relative group">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <i class="fa-regular fa-circle text-Rivo-400"></i>
+                                </div>
+                                <input type="text" id="startInput"
+                                    class="block w-full pl-10 pr-3 py-3 border border-gray-200 rounded-xl leading-5 bg-sand-50 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-Rivo-500 focus:border-Rivo-500 transition duration-150 ease-in-out sm:text-sm"
+                                    placeholder="Current Location" value="Sector 1, CGC Landran">
+                                <div id="startSuggestions"
+                                    class="absolute top-full mt-1 w-full bg-white border border-gray-200 rounded-xl shadow-lg hidden max-h-48 overflow-y-auto z-50">
+                                </div>
+                            </div>
+
+                            <div class="relative group">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <i class="fa-solid fa-location-dot text-Rivo-500"></i>
+                                </div>
+                                <input type="text" id="endInput"
+                                    class="block w-full pl-10 pr-3 py-3 border border-gray-200 rounded-xl leading-5 bg-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-Rivo-500 focus:border-Rivo-500 transition duration-150 ease-in-out sm:text-sm"
+                                    placeholder="Destination" value="Sukhna Lake, Chandigarh">
+                                <div id="endSuggestions"
+                                    class="absolute top-full mt-1 w-full bg-white border border-gray-200 rounded-xl shadow-lg hidden max-h-48 overflow-y-auto z-50">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="space-y-6 mb-8">
+                            <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wider">Sensory Preferences
+                            </h3>
+
+                            <div>
+                                <div class="flex justify-between mb-2">
+                                    <label class="text-sm font-medium text-Rivo-900">Noise Tolerance</label>
+                                    <span id="noiseValue"
+                                        class="text-xs text-Rivo-500 font-medium bg-Rivo-50 px-2 py-1 rounded">Quiet
+                                        Priority</span>
+                                </div>
+                                <input type="range" id="noiseSlider" min="1" max="100" value="20"
+                                    class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer">
+                                <div class="flex justify-between text-xs text-gray-400 mt-1">
+                                    <span>Silent</span>
+                                    <span>Lively</span>
+                                </div>
+                            </div>
+
+                            <div class="space-y-3">
+                                <label
+                                    class="flex items-center justify-between p-3 border border-gray-100 rounded-xl hover:bg-Rivo-50 transition-colors cursor-pointer group">
+                                    <div class="flex items-center gap-3">
+                                        <div
+                                            class="w-8 h-8 rounded-full bg-orange-100 text-orange-500 flex items-center justify-center">
+                                            <i class="fa-solid fa-users"></i>
+                                        </div>
+                                        <span class="text-sm font-medium text-gray-700">Avoid Crowds</span>
+                                    </div>
+                                    <div class="toggle-container">
+                                        <input type="checkbox" id="toggle-crowds" class="toggle-checkbox">
+                                        <label class="toggle-label" for="toggle-crowds">
+                                            <span class="toggle-slider"></span>
+                                        </label>
+                                    </div>
+                                </label>
+
+                                <label
+                                    class="flex items-center justify-between p-3 border border-gray-100 rounded-xl hover:bg-Rivo-50 transition-colors cursor-pointer group">
+                                    <div class="flex items-center gap-3">
+                                        <div
+                                            class="w-8 h-8 rounded-full bg-blue-100 text-blue-500 flex items-center justify-center">
+                                            <i class="fa-solid fa-hard-hat"></i>
+                                        </div>
+                                        <span class="text-sm font-medium text-gray-700">Avoid Construction</span>
+                                    </div>
+                                    <div class="toggle-container">
+                                        <input type="checkbox" id="toggle-const" class="toggle-checkbox">
+                                        <label class="toggle-label" for="toggle-const">
+                                            <span class="toggle-slider"></span>
+                                        </label>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+
+                        <button id="findRouteBtn"
+                            class="mt-auto w-full bg-Rivo-500 hover:bg-Rivo-600 text-white font-semibold py-4 rounded-xl shadow-md transition-all flex items-center justify-center gap-2 group">
+                            <span>Suggest Comfortable Route</span>
+                            <i class="fa-solid fa-wand-magic-sparkles group-hover:rotate-12 transition-transform"></i>
+                        </button>
+                    </div>
+
+                    <div class="relative w-full lg:w-2/3 h-full bg-gray-100">
+                        <div id="map"></div>
+
+                        <div
+                            class="absolute top-4 right-4 z-[400] bg-white/90 backdrop-blur-sm p-3 rounded-lg shadow-lg border border-gray-100 text-xs">
+                            <div class="flex items-center gap-2 mb-2">
+                                <span class="w-3 h-3 rounded-full bg-orange-400 opacity-50"></span>
+                                <span class="text-gray-600">High Stimulation Zone</span>
+                            </div>
+                            <div class="flex items-center gap-2 mb-2">
+                                <span class="w-3 h-3 rounded-full bg-Rivo-500"></span>
+                                <span class="text-gray-600">Rivo Route</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="w-3 h-3 rounded-full bg-gray-400 border border-white"></span>
+                                <span class="text-gray-600">Standard Route</span>
+                            </div>
+                        </div>
+
+                        <div id="gentleAlert"
+                            class="absolute bottom-6 left-1/2 -translate-x-1/2 z-[400] bg-white/95 backdrop-blur px-4 py-3 rounded-full shadow-lg border-l-4 border-yellow-400 hidden flex items-center gap-3 transition-all duration-500">
+                            <i class="fa-solid fa-circle-info text-yellow-500"></i>
+                            <span id="alertText" class="text-sm font-medium text-gray-700">Note: Construction detected.
+                                Re-routing...</span>
+                        </div>
+
+                        <div id="routeStats"
+                            class="absolute bottom-6 left-6 z-[400] bg-white/95 backdrop-blur px-4 py-3 rounded-xl shadow-lg border border-gray-100 hidden space-y-1 text-sm">
+                            <div class="flex items-center gap-2 text-Rivo-700 font-medium">
+                                <i class="fa-solid fa-route text-Rivo-500"></i>
+                                <span id="routeDistance">1.2 km Rivo Route (+15% longer)</span>
+                            </div>
+                            <div class="flex items-center gap-2 text-gray-600">
+                                <i class="fa-solid fa-volume-xmark text-green-500"></i>
+                                <span id="quietness">95% quieter path</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <footer class="mt-12 pt-8 border-t border-Rivo-100 text-center text-sm text-Rivo-400">
+            <div class="max-w-7xl mx-auto px-4">
+                © 2025 Rivo Navigation Inc. All rights reserved. Powered by Azure Maps
+            </div>
+        </footer>
+
+        <script>
+            let map, datasource, noiseLayer, routeLayer, startMarker, endMarker, constructionLayer;
+            let startCoords = [76.8, 30.755];
+            let endCoords = [76.78, 30.74];
+            const subscriptionKey = 'YOUR_AZURE_MAPS_SUBSCRIPTION_KEY_HERE';
+
+            document.addEventListener('DOMContentLoaded', () => {
+                initMap();
+                initControls();
+                setupAutocomplete();
+            });
+
+            function initMap() {
+                const mapCenter = [76.7794, 30.7333];
+
+                map = new atlas.Map('map', {
+                    center: mapCenter,
+                    zoom: 13,
+                    authOptions: {
+                        authType: 'subscriptionKey',
+                        subscriptionKey: subscriptionKey
+                    },
+                    view: 'Auto',
+                    language: 'en-US'
+                });
+
+                map.events.add('ready', () => {
+                    datasource = new atlas.source.DataSource();
+                    map.sources.add(datasource);
+
+                    noiseLayer = new atlas.source.DataSource();
+                    map.sources.add(noiseLayer);
+
+                    constructionLayer = new atlas.source.DataSource();
+                    map.sources.add(constructionLayer);
+
+                    routeLayer = new atlas.source.DataSource();
+                    map.sources.add(routeLayer);
+
+                    map.layers.add([
+                        new atlas.layer.CircleLayer(noiseLayer, null, {
+                            circleColor: '#F97316',
+                            circleOpacity: 0.15,
+                            circleRadius: 25
+                        }),
+                        new atlas.layer.CircleLayer(constructionLayer, null, {
+                            circleColor: '#3B82F6',
+                            circleOpacity: 0.2,
+                            circleRadius: 30,
+                            circleStrokeColor: '#1E40AF',
+                            circleStrokeWidth: 2
+                        }),
+                        new atlas.layer.LineLayer(routeLayer, 'standard-route', {
+                            strokeColor: '#9CA3AF',
+                            strokeWidth: 4,
+                            strokeDashArray: [5, 10],
+                            strokeOpacity: 0.6
+                        }),
+                        new atlas.layer.LineLayer(routeLayer, 'calm-route', {
+                            strokeColor: '#3D9696',
+                            strokeWidth: 6,
+                            strokeOpacity: 0.9
+                        })
+                    ], 'labels');
+
+                    startMarker = new atlas.HtmlMarker({
+                        position: startCoords,
+                        htmlContent: `<div style="background-color:#3D9696;width:16px;height:16px;border-radius:50%;border:3px solid white;box-shadow:0 2px 5px rgba(0,0,0,0.3);"></div>`
+                    });
+                    endMarker = new atlas.HtmlMarker({
+                        position: endCoords,
+                        htmlContent: `<div style="background-color:#214141;width:20px;height:20px;border-radius:50%;border:3px solid white;box-shadow:0 2px 5px rgba(0,0,0,0.3);display:flex;justify-content:center;align-items:center;"><i class='fa-solid fa-flag-checkered' style='color:white;font-size:10px;'></i></div>`
+                    });
+                    map.markers.add([startMarker, endMarker]);
+
+                    addNoiseZones();
+                    addConstructionZones();
+                });
+            }
+
+            function addNoiseZones() {
+                const noiseZones = [
+                    [76.79, 30.745],
+                    [76.77, 30.735],
+                    [76.81, 30.76]
+                ];
+                noiseZones.forEach(zone => {
+                    noiseLayer.add(new atlas.data.Point(zone));
+                });
+            }
+
+            function addConstructionZones() {
+                const constructionZones = [
+                    [76.82, 30.75],
+                    [76.75, 30.73]
+                ];
+                constructionZones.forEach(zone => {
+                    constructionLayer.add(new atlas.data.Point(zone));
+                });
+            }
+
+            function setupAutocomplete() {
+                const startInput = document.getElementById('startInput');
+                const endInput = document.getElementById('endInput');
+                const startSuggestions = document.getElementById('startSuggestions');
+                const endSuggestions = document.getElementById('endSuggestions');
+
+                startInput.addEventListener('input', (e) => {
+                    if (e.target.value.length > 0) {
+                        fetchSuggestions(e.target.value, startSuggestions, startInput, true);
+                    }
+                });
+
+                endInput.addEventListener('input', (e) => {
+                    if (e.target.value.length > 0) {
+                        fetchSuggestions(e.target.value, endSuggestions, endInput, false);
+                    }
+                });
+
+                document.addEventListener('click', (e) => {
+                    if (!e.target.closest('.relative')) {
+                        startSuggestions.classList.add('hidden');
+                        endSuggestions.classList.add('hidden');
+                    }
+                });
+            }
+
+            function fetchSuggestions(query, suggestionsDiv, inputElement, isStart) {
+                const mockData = {
+                    'pike': [
+                        { name: 'Pike Place Market', coords: [-122.3422, 47.6097] },
+                        { name: 'Pike Street', coords: [-122.340, 47.615] }
+                    ],
+                    'space': [
+                        { name: 'Space Needle', coords: [-122.3493, 47.6205] },
+                        { name: 'Space Center', coords: [-122.338, 47.612] }
+                    ],
+                    'seattle': [
+                        { name: 'Seattle Center', coords: [-122.3493, 47.6205] },
+                        { name: 'Seattle Public Library', coords: [-122.3293, 47.6062] }
+                    ],
+                    'sector': [
+                        { name: 'Sector 1, Chandigarh', coords: [76.8, 30.755] },
+                        { name: 'Sector 17, Chandigarh', coords: [76.79, 30.745] },
+                        { name: 'Sector 22, Chandigarh', coords: [76.77, 30.735] }
+                    ],
+                    'sukh': [
+                        { name: 'Sukhna Lake, Chandigarh', coords: [76.78, 30.74] },
+                        { name: 'Sukhna Lake Road', coords: [76.775, 30.745] }
+                    ]
+                };
+
+                const key = query.toLowerCase().substring(0, 4);
+                const results = mockData[key] || [];
+
+                suggestionsDiv.innerHTML = '';
+
+                if (results.length === 0) {
+                    suggestionsDiv.classList.add('hidden');
+                    return;
+                }
+
+                results.forEach(result => {
+                    const div = document.createElement('div');
+                    div.className = 'px-4 py-2 hover:bg-Rivo-50 cursor-pointer border-b text-sm text-gray-700';
+                    div.innerHTML = `<i class="fa-solid fa-location-dot text-Rivo-500 mr-2"></i>${result.name}`;
+                    div.addEventListener('click', () => {
+                        inputElement.value = result.name;
+                        suggestionsDiv.classList.add('hidden');
+
+                        if (isStart) {
+                            startCoords = result.coords;
+                            if (startMarker) startMarker.setOptions({ position: startCoords });
+                        } else {
+                            endCoords = result.coords;
+                            if (endMarker) endMarker.setOptions({ position: endCoords });
+                        }
+                    });
+                    suggestionsDiv.appendChild(div);
+                });
+
+                suggestionsDiv.classList.remove('hidden');
+            }
+
+            function initControls() {
+                const btn = document.getElementById('findRouteBtn');
+                const btnText = btn.querySelector('span');
+                const btnIcon = btn.querySelector('i');
+                const alert = document.getElementById('gentleAlert');
+                const stats = document.getElementById('routeStats');
+                const noiseSlider = document.getElementById('noiseSlider');
+                const noiseValue = document.getElementById('noiseValue');
+                const toggleCrowds = document.getElementById('toggle-crowds');
+                const toggleConst = document.getElementById('toggle-const');
+
+                noiseSlider.addEventListener('input', (e) => {
+                    const value = e.target.value;
+                    const labels = ['Silent', 'Quiet Priority', 'Moderate', 'Lively OK'];
+                    const index = Math.min(Math.floor(value / 25), 3);
+                    noiseValue.textContent = labels[index];
+                });
+
+                toggleCrowds.addEventListener('change', () => {
+                    console.log('Avoid Crowds:', toggleCrowds.checked);
+                });
+
+                toggleConst.addEventListener('change', () => {
+                    console.log('Avoid Construction:', toggleConst.checked);
+                });
+
+                btn.addEventListener('click', () => {
+                    if (btn.disabled) return;
+                    btn.disabled = true;
+                    const originalText = btnText.innerText;
+                    btnText.innerText = "Finding calm path...";
+                    btnIcon.classList.add("loader");
+                    btnIcon.classList.remove("fa-solid", "fa-wand-magic-sparkles", "group-hover:rotate-12", "transition-transform");
+
+                    routeLayer.clear();
+
+                    const avoidConstruction = toggleConst.checked;
+                    const standardRoute = [
+                        startCoords,
+                        [startCoords[0] + 0.004, startCoords[1] + 0.002],
+                        [(startCoords[0] + endCoords[0]) / 2, (startCoords[1] + endCoords[1]) / 2],
+                        endCoords
+                    ];
+
+                    const calmRoute = avoidConstruction ?
+                        [
+                            startCoords,
+                            [startCoords[0] + 0.007, startCoords[1]],
+                            [startCoords[0] + 0.010, startCoords[1] + 0.004],
+                            [endCoords[0] - 0.003, endCoords[1] + 0.002],
+                            endCoords
+                        ] :
+                        [
+                            startCoords,
+                            [startCoords[0] + 0.006, startCoords[1]],
+                            [startCoords[0] + 0.008, startCoords[1] + 0.003],
+                            [endCoords[0] - 0.002, endCoords[1] + 0.001],
+                            endCoords
+                        ];
+
+                    routeLayer.add(new atlas.data.LineString(standardRoute));
+                    routeLayer.add(new atlas.data.LineString(calmRoute));
+
+                    document.getElementById('routeDistance').textContent =
+                        avoidConstruction ? '1.5 km Rivo Route (+25% longer)' : '1.2 km Rivo Route (+15% longer)';
+                    document.getElementById('quietness').textContent = '95% quieter path';
+
+                    document.getElementById('alertText').textContent =
+                        avoidConstruction ? 'Avoided construction zones completely' : 'Note: Construction detected. Re-routing...';
+
+                    const bounds = atlas.data.BoundingBox.fromData(routeLayer.getData());
+
+                    if (bounds) {
+                        map.setCamera({
+                            bounds: bounds,
+                            padding: 50,
+                            animationDuration: 1500
+                        });
+                    }
+
+                    setTimeout(() => {
+                        btn.disabled = false;
+                        btnText.innerText = originalText;
+                        btnIcon.className = "fa-solid fa-wand-magic-sparkles group-hover:rotate-12 transition-transform";
+                        stats.classList.remove('hidden');
+                    }, 1500);
+
+                    setTimeout(() => {
+                        alert.classList.remove('hidden');
+                        setTimeout(() => {
+                            alert.style.opacity = '0';
+                            setTimeout(() => alert.classList.add('hidden'), 500);
+                        }, 5000);
+                    }, 2000);
+                });
+            }
+        </script>
+
+        <!-- Feedback & Testimonials -->
+
+        <footer class="site-footer">
+            <div class="container footer-inner">
+                <div class="footer-brand">
+                    <a class="logo" href="#home" aria-label="Rivo Navigation home">
+                        <img src="logo1.png" alt="Rivo Logo" width="50" height="50" style="border-radius: 8px;">
+                        <span class="brand-name">Rivo</span>
+                    </a>
+                    <p>Find routes that feel right for you.</p>
+                </div>
+
+                <nav aria-label="Footer">
+                    <ul class="footer-list">
+                        <li><a href="#problem">Problem</a></li>
+                        <li><a href="#features">Features</a></li>
+                        <li><a href="#demo">Demo</a></li>
+                        <li><a href="#contact">Contact</a></li>
+                    </ul>
+                </nav>
+
+                <div class="footer-social" aria-label="Social media">
+                    <a href="#" aria-label="Twitter"><span aria-hidden="true">𝕏</span></a>
+                    <a href="#" aria-label="LinkedIn"><span aria-hidden="true">in</span></a>
+                    <a href="#" aria-label="Instagram"><span aria-hidden="true">◎</span></a>
+                </div>
+            </div>
+
+            <div class="footer-bottom">
+                <small>&copy; <span id="year"></span> Rivo Navigation. All rights reserved.</small>
+            </div>
+        </footer>
+
+
+        <script src="script.js"></script>
+
+</body>
+
+</html>

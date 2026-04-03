@@ -1,0 +1,867 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+       
+    <meta charset="UTF-8">
+       
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Rivo - Navigate with Peace | Azure Maps</title>
+
+        <!-- Fonts (Same as index.html) -->
+       
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+       
+    <link        
+        href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Open+Sans:wght@400;600&display=swap"
+                rel="stylesheet">
+
+        <!-- Icons -->
+       
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+        <!-- Azure Maps SDK -->
+       
+    <link rel="stylesheet" href="https://atlas.microsoft.com/sdk/javascript/mapcontrol/2/atlas.min.css" type="text/css">
+       
+    <script src="https://atlas.microsoft.com/sdk/javascript/mapcontrol/2/atlas.min.js"></script>
+
+        <!-- Tailwind CSS -->
+       
+    <script src="https://cdn.tailwindcss.com"></script>
+        <!-- Use main site styles -->
+       
+    <link rel="stylesheet" href="style.css">
+
+       
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        Rivo: {
+                            50: 'var(--Rivo-50)',
+                            100: 'var(--Rivo-100)',
+                            200: 'var(--Rivo-200)',
+                            300: 'var(--Rivo-300)',
+                            400: 'var(--Rivo-400)',
+                            500: 'var(--Rivo-500)',
+                            600: 'var(--Rivo-600)',
+                            700: 'var(--Rivo-700)',
+                            800: 'var(--Rivo-800)',
+                            900: 'var(--Rivo-900)',
+                        },
+                        sand: {
+                            50: 'var(--sand-50)',
+                            100: 'var(--sand-100)',
+                            200: 'var(--sand-200)',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['"Open Sans"', 'sans-serif'],
+                        heading: ['"Poppins"', 'sans-serif'],
+                    },
+                    boxShadow: {
+                        'soft': '0 10px 40px -10px rgba(14, 165, 162, 0.15)',
+                        'card': '0 4px 6px -1px rgba(0, 0, 0, 0.02), 0 2px 4px -1px rgba(0, 0, 0, 0.02)',
+                    }
+                }
+            }
+        }
+    </script>
+
+        <style>
+        :root {
+            /* Light mode defaults */
+            --Rivo-50: #F0F9F9;
+            --Rivo-100: #Ddf2f2;
+            --Rivo-200: #Bce3e3;
+            --Rivo-300: #90cece;
+            --Rivo-400: #5FB3B3;
+            --Rivo-500: #0EA5A2;
+            --Rivo-600: #0C8C89;
+            --Rivo-700: #286060;
+            --Rivo-800: #254E4E;
+            --Rivo-900: #214141;
+
+            --sand-50: #F8FAFC;
+            --sand-100: #F7F3EB;
+            --sand-200: #EFE6D6;
+
+            --panel-bg: #FFFFFF;
+            --input-bg: #F8FAFC;
+            --input-border: #E2E8F0;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                /* Dark mode overrides */
+                --Rivo-50: #1a2e2e;
+                --Rivo-100: #214141;
+                --Rivo-200: #254E4E;
+                --Rivo-300: #286060;
+                --Rivo-400: #0C8C89;
+                --Rivo-500: #0EA5A2;
+                /* Keep primary same or slightly lighter? Keep same for now */
+                --Rivo-600: #5FB3B3;
+                /* Invert darker shades? */
+                --Rivo-700: #90cece;
+                --Rivo-800: #Bce3e3;
+                --Rivo-900: #F0F9F9;
+                /* Text should be light */
+
+                --sand-50: #0F172A;
+                /* Match surface dark */
+                --sand-100: #1E293B;
+                --sand-200: #334155;
+
+                --panel-bg: #1E293B;
+                --input-bg: #0F172A;
+                --input-border: #334155;
+            }
+        }
+
+        /* Inherit body styles from style.css */
+
+        *:focus-visible {
+            outline: 2px solid var(--Rivo-500);
+            outline-offset: 2px;
+        }
+
+        .skip-link {
+            position: absolute;
+            top: -40px;
+            left: 0;
+            background: var(--Rivo-500);
+            color: white;
+            padding: 8px;
+            z-index: 9999;
+            transition: top 0.3s;
+        }
+
+        .skip-link:focus {
+            top: 0;
+        }
+
+        #map {
+            width: 100%;
+            height: 100%;
+            border-radius: 1rem;
+            z-index: 10;
+        }
+
+        .loader {
+            border: 3px solid var(--sand-100);
+            border-radius: 50%;
+            border-top: 3px solid var(--Rivo-500);
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        @keyframes pulse-soft {
+            0% {
+                box-shadow: 0 0 0 0 rgba(14, 165, 162, 0.4);
+            }
+
+            70% {
+                box-shadow: 0 0 0 10px rgba(14, 165, 162, 0);
+            }
+
+            100% {
+                box-shadow: 0 0 0 0 rgba(14, 165, 162, 0);
+            }
+        }
+
+        .animate-pulse-soft {
+            animation: pulse-soft 2s infinite;
+        }
+
+        .toggle-container {
+            position: relative;
+            display: inline-block;
+            width: 40px;
+            height: 20px;
+        }
+
+        .toggle-checkbox {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-label {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: var(--input-border);
+            border-radius: 20px;
+            transition: 0.3s;
+        }
+
+        .toggle-container input:checked+.toggle-label {
+            background-color: var(--Rivo-500);
+        }
+
+        .toggle-slider {
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 16px;
+            height: 16px;
+            background-color: white;
+            border-radius: 50%;
+            transition: 0.3s;
+        }
+
+        .toggle-container input:checked+.toggle-label .toggle-slider {
+            transform: translateX(20px);
+        }
+
+        input[type="range"] {
+            -webkit-appearance: none;
+            appearance: none;
+            height: 6px;
+            background: var(--input-border);
+            border-radius: 3px;
+            outline: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            background: var(--Rivo-500);
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 2px 6px rgba(14, 165, 162, 0.3);
+        }
+    </style>
+</head>
+
+<body>
+
+        <a href="#demo" class="skip-link focus:outline-none">Skip to main content</a>
+
+        <div id="site-header-placeholder"></div>
+
+        <div class="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full -z-0 pointer-events-none opacity-50">
+                <div            
+            class="absolute top-20 left-10 w-72 h-72 bg-Rivo-200 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-pulse-soft">
+                    </div>
+                <div            
+            class="absolute top-40 right-10 w-72 h-72 bg-sand-200 rounded-full mix-blend-multiply filter blur-3xl opacity-70">
+                    </div>
+            </div>
+
+        <!-- API Key Notice -->
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
+                <div class="bg-blue-50 border-l-4 border-blue-500 p-4 rounded-lg mb-4">
+                        <div class="flex">
+                                <div class="flex-shrink-0">
+                                        <i class="fas fa-info-circle text-blue-500"></i>
+                                    </div>
+                                <div class="ml-3">
+                                        <p class="text-sm text-blue-700">
+                                                <strong>Azure Maps API Key Required:</strong> Replace <code            
+                                            class="bg-blue-100 px-2 py-1 rounded">YOUR_AZURE_MAPS_KEY</code> in the
+                        JavaScript code with
+                                                your actual Azure Maps subscription key.
+                                                <a href="https://azure.microsoft.com/en-us/products/azure-maps"
+                            target="_blank"                             class="underline">Get a free key here</a>.
+                                            </p>
+                                    </div>
+                            </div>
+                    </div>
+            </div>
+
+        <section id="demo" class="py-12 relative min-h-screen">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                        <div                
+                class="bg-sand-50 rounded-3xl shadow-xl overflow-hidden border border-Rivo-100 flex flex-col lg:flex-row h-screen lg:h-[700px] max-h-[90vh]">
+
+                                <div                    
+                    class="w-full lg:w-1/3 p-6 lg:p-8 flex flex-col border-b lg:border-b-0 lg:border-r border-Rivo-100 bg-[var(--panel-bg)] z-20 overflow-y-auto">
+                                        <h2 class="text-2xl lg:text-3xl font-heading font-bold text-Rivo-900 mb-6">Plan
+                        a Calm Route</h2>
+
+                                        <div class="space-y-4 mb-6">
+                                                <div class="relative group">
+                                                        <div
+                                class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                                                <i class="fa-regular fa-circle text-Rivo-400"></i>
+                                                            </div>
+                                                        <input type="text" id="startInput"                              
+                                 
+                                class="block w-full pl-10 pr-10 py-3 border border-gray-200 rounded-xl leading-5 bg-[var(--input-bg)] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-Rivo-500 focus:border-Rivo-500 transition duration-150 ease-in-out sm:text-sm"
+                                                                placeholder="Current Location"
+                                value="Sector 1, CGC Landran">
+                                                        <button id="locateMeBtn"                                
+                                class="absolute inset-y-0 right-0 pr-3 flex items-center cursor-pointer text-Rivo-400 hover:text-Rivo-600 transition-colors"
+                                                                title="Use Current Location">
+                                                                <i class="fa-solid fa-location-crosshairs"></i>
+                                                            </button>
+                                                        <div id="startSuggestions"                                
+                                class="absolute top-full mt-1 w-full bg-white border border-gray-200 rounded-xl shadow-lg hidden max-h-48 overflow-y-auto z-50">
+                                                            </div>
+                                                    </div>
+
+                                                <div class="relative group">
+                                                        <div
+                                class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                                                <i class="fa-solid fa-location-dot text-Rivo-500"></i>
+                                                            </div>
+                                                        <input type="text" id="endInput"                                
+                                class="block w-full pl-10 pr-3 py-3 border border-gray-200 rounded-xl leading-5 bg-[var(--input-bg)] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-Rivo-500 focus:border-Rivo-500 transition duration-150 ease-in-out sm:text-sm"
+                                                                placeholder="Destination"
+                                value="Sukhna Lake, Chandigarh">
+                                                        <div id="endSuggestions"                                
+                                class="absolute top-full mt-1 w-full bg-white border border-gray-200 rounded-xl shadow-lg hidden max-h-48 overflow-y-auto z-50">
+                                                            </div>
+                                                    </div>
+                                            </div>
+
+                                        <div class="space-y-6 mb-8">
+                                                <h3
+                            class="text-sm font-semibold text-gray-500 uppercase tracking-wider">Sensory Preferences
+                                                    </h3>
+
+                                                <div>
+                                                        <div class="flex justify-between mb-2">
+                                                                <label class="text-sm font-medium text-Rivo-900">Noise
+                                    Tolerance</label>
+                                                                <span id="noiseValue"                                  
+                                      class="text-xs text-Rivo-500 font-medium bg-Rivo-50 px-2 py-1 rounded">Quiet
+                                                                        Priority</span>
+                                                            </div>
+                                                        <input type="range" id="noiseSlider" min="1" max="100"
+                                value="20"                                
+                                class="w-full h-2 bg-[var(--input-border)] rounded-lg appearance-none cursor-pointer">
+                                                        <div class="flex justify-between text-xs text-gray-400 mt-1">
+                                                                <span>Silent</span>
+                                                                <span>Lively</span>
+                                                            </div>
+                                                    </div>
+
+                                                <div class="space-y-3">
+                                                        <label                                
+                                class="flex items-center justify-between p-3 border border-gray-100 rounded-xl hover:bg-Rivo-50 transition-colors cursor-pointer group">
+                                                                <div class="flex items-center gap-3">
+                                                                        <div                                        
+                                        class="w-8 h-8 rounded-full bg-orange-100 text-orange-500 flex items-center justify-center">
+                                                                                <i class="fa-solid fa-users"></i>
+                                                                            </div>
+                                                                        <span
+                                        class="text-sm font-medium text-gray-700">Avoid Crowds</span>
+                                                                    </div>
+                                                                <div class="toggle-container">
+                                                                        <input type="checkbox" id="toggle-crowds"
+                                        class="toggle-checkbox">
+                                                                        <label class="toggle-label" for="toggle-crowds">
+                                                                                <span class="toggle-slider"></span>
+                                                                            </label>
+                                                                    </div>
+                                                            </label>
+
+                                                        <label                                
+                                class="flex items-center justify-between p-3 border border-gray-100 rounded-xl hover:bg-Rivo-50 transition-colors cursor-pointer group">
+                                                                <div class="flex items-center gap-3">
+                                                                        <div                                        
+                                        class="w-8 h-8 rounded-full bg-blue-100 text-blue-500 flex items-center justify-center">
+                                                                                <i class="fa-solid fa-hard-hat"></i>
+                                                                            </div>
+                                                                        <span
+                                        class="text-sm font-medium text-gray-700">Avoid Construction</span>
+                                                                    </div>
+                                                                <div class="toggle-container">
+                                                                        <input type="checkbox" id="toggle-const"
+                                        class="toggle-checkbox">
+                                                                        <label class="toggle-label" for="toggle-const">
+                                                                                <span class="toggle-slider"></span>
+                                                                            </label>
+                                                                    </div>
+                                                            </label>
+                                                    </div>
+                                            </div>
+
+                                        <div class="mt-6 pt-6 border-t border-gray-100">
+                                                <h3
+                            class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3">Live Demo</h3>
+                                                <button id="addNoiseBtn"                            
+                            class="w-full py-2 px-4 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-2">
+                                                        <i class="fa-solid fa-bullhorn text-orange-500"></i>
+                                                        <span>Simulate Sudden Noise</span>
+                                                    </button>
+                                                <button id="clearZonesBtn"                            
+                            class="w-full mt-2 py-2 px-4 bg-red-50 hover:bg-red-100 text-red-600 rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-2">
+                                                        <i class="fa-solid fa-trash-can text-red-500"></i>
+                                                        <span>Clear All Zones</span>
+                                                    </button>
+                                                <p id="demoModeHint"
+                            class="hidden text-xs text-orange-600 mt-2 text-center animate-pulse">
+                                                        Click anywhere on the map to add a noise source.
+                                                    </p>
+                                            </div>
+
+                                        <button id="findRouteBtn"                        
+                        class="mt-auto w-full bg-Rivo-500 hover:bg-Rivo-600 text-white font-semibold py-4 rounded-xl shadow-md transition-all flex items-center justify-center gap-2 group">
+                                                <span>Suggest Comfortable Route</span>
+                                                <i
+                            class="fa-solid fa-wand-magic-sparkles group-hover:rotate-12 transition-transform"></i>
+                                            </button>
+                                    </div>
+
+                                <div class="relative w-full lg:w-2/3 h-full bg-[var(--sand-50)]">
+                                        <div id="map"></div>
+
+                                        <div                        
+                        class="absolute top-4 right-4 z-[400] bg-white/90 backdrop-blur-sm p-3 rounded-lg shadow-lg border border-gray-100 text-xs">
+                                                <div class="flex items-center gap-2 mb-2">
+                                                        <span
+                                class="w-3 h-3 rounded-full bg-orange-400 opacity-50"></span>
+                                                        <span class="text-gray-600">High Stimulation Zone</span>
+                                                    </div>
+                                                <div class="flex items-center gap-2 mb-2">
+                                                        <span class="w-3 h-3 rounded-full bg-Rivo-500"></span>
+                                                        <span class="text-gray-600">Rivo Route</span>
+                                                    </div>
+                                                <div class="flex items-center gap-2">
+                                                        <span
+                                class="w-3 h-3 rounded-full bg-gray-400 border border-white"></span>
+                                                        <span class="text-gray-600">Standard Route</span>
+                                                    </div>
+                                            </div>
+
+                                        <div id="gentleAlert"                        
+                        class="absolute bottom-6 left-1/2 -translate-x-1/2 z-[400] bg-white/95 backdrop-blur px-4 py-3 rounded-full shadow-lg border-l-4 border-yellow-400 hidden flex items-center gap-3 transition-all duration-500">
+                                                <i class="fa-solid fa-circle-info text-yellow-500"></i>
+                                                <span id="alertText" class="text-sm font-medium text-gray-700">Note:
+                            Construction detected.
+                                                        Re-routing...</span>
+                                            </div>
+
+                                        <div id="routeStats"                        
+                        class="absolute bottom-6 left-6 z-[400] bg-white/95 backdrop-blur px-4 py-3 rounded-xl shadow-lg border border-gray-100 hidden space-y-1 text-sm">
+                                                <div class="flex items-center gap-2 text-Rivo-700 font-medium">
+                                                        <i class="fa-solid fa-route text-Rivo-500"></i>
+                                                        <span id="routeDistance">1.2 km Rivo Route (+15% longer)</span>
+                                                    </div>
+                                                <div class="flex items-center gap-2 text-gray-600">
+                                                        <i class="fa-solid fa-volume-xmark text-green-500"></i>
+                                                        <span id="quietness">95% quieter path</span>
+                                                    </div>
+                                            </div>
+                                    </div>
+                            </div>
+                    </div>
+            </section>
+        <!-- footer-->
+        <footer class="bg-gray-900 text-white py-12">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+                                <div>
+                                        <div class="flex items-center mb-4">
+                                                <i class="fas fa-route text-2xl text-teal-400 mr-2"></i>
+                                                <span class="text-xl font-bold">Rivo</span>
+                                            </div>
+                                        <p class="text-gray-400 text-sm">AI-powered sensory-friendly navigation for
+                        everyone.</p>
+                                    </div>
+                                
+                                <div>
+                                        <h4 class="font-bold mb-4">Product</h4>
+                                        <ul class="space-y-2 text-gray-400 text-sm">
+                                                <li><a href="#features" class="hover:text-white">Features</a></li>
+                                                <li><a href="#demo" class="hover:text-white">Try Demo</a></li>
+                                                <li><a href="#comparison" class="hover:text-white">Comparison</a></li>
+                                            </ul>
+                                    </div>
+                                
+                                <div>
+                                        <h4 class="font-bold mb-4">Resources</h4>
+                                        <ul class="space-y-2 text-gray-400 text-sm">
+                                                <li><a href="#" class="hover:text-white">Documentation</a></li>
+                                                <li><a href="#" class="hover:text-white">API Access</a></li>
+                                                <li><a href="#" class="hover:text-white">Community</a></li>
+                                            </ul>
+                                    </div>
+                                
+                                <div>
+                                        <h4 class="font-bold mb-4">Technology</h4>
+                                        <ul class="space-y-2 text-gray-400 text-sm">
+                                                <li><i class="fas fa-check text-teal-400 mr-2"></i>Azure Machine
+                            Learning</li>
+                                                <li><i class="fas fa-check text-teal-400 mr-2"></i>Azure Maps</li>
+                                                <li><i class="fas fa-check text-teal-400 mr-2"></i>Azure Cosmos DB</li>
+                                                <li><i class="fas fa-check text-teal-400 mr-2"></i>Azure Functions</li>
+                                            </ul>
+                                    </div>
+                            </div>
+                        
+                        <div class="border-t border-gray-800 pt-8 text-center text-gray-400 text-sm">
+                                <p>© 2024 Rivo. Built with ❤️ for Microsoft Imagine Cup.</p>
+                                <p class="mt-2">Empowering people with autism and sensory sensitivities to navigate with
+                    confidence.</p>
+                            </div>
+                    </div>
+            </footer>
+
+
+        <div id="site-footer-placeholder"></div>
+
+       
+    <script src="layout.js"></script>
+
+       
+    <script>
+        // ===== AZURE MAPS CONFIGURATION =====
+        const AZURE_MAPS_KEY = 'YOUR_AZURE_MAPS_KEY'; // Replace with your actual key
+
+        // Global Zones (stored as [Lng, Lat])
+        let globalNoiseZones = [[76.79, 30.745], [76.77, 30.735], [76.81, 30.76]];
+        let globalConstructionZones = [[76.82, 30.75], [76.75, 30.73]];
+        let globalCrowdZones = [[76.795, 30.755], [76.785, 30.74]];
+
+        let map, datasource, startMarker, endMarker;
+        let startCoords = [76.8, 30.755]; // Lng, Lat
+        let endCoords = [76.78, 30.74];
+        let isCalculating = false;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            initMap();
+            initControls();
+            setupAutocomplete();
+        });
+
+        function initMap() {
+            map = new atlas.Map('map', {
+                center: [76.7794, 30.7333],
+                zoom: 12,
+                view: 'Auto',
+                authOptions: {
+                    authType: 'subscriptionKey',
+                    subscriptionKey: AZURE_MAPS_KEY
+                },
+                style: 'road'
+            });
+
+            map.events.add('ready', () => {
+                datasource = new atlas.source.DataSource();
+                map.sources.add(datasource);
+
+                // Add layers for zones (polygons)
+                map.layers.add(new atlas.layer.PolygonLayer(datasource, null, {
+                    fillColor: ['get', 'fillColor'],
+                    fillOpacity: ['get', 'fillOpacity']
+                }));
+
+                // Add layer for zone borders/dashed lines
+                map.layers.add(new atlas.layer.LineLayer(datasource, null, {
+                    strokeColor: ['get', 'strokeColor'],
+                    strokeWidth: ['get', 'strokeWidth'],
+                    strokeDashArray: ['get', 'strokeDash']
+                }));
+
+                // Add layer for routes
+                map.layers.add(new atlas.layer.LineLayer(datasource, null, {
+                    strokeColor: ['get', 'routeColor'],
+                    strokeWidth: ['get', 'routeWidth'],
+                    strokeDashArray: ['get', 'routeDash'],
+                    lineJoin: 'round',
+                    lineCap: 'round',
+                    filter: ['==', ['get', 'type'], 'route']
+                }));
+
+                // Create HTML Markers (matching original Leaflet styling)
+                startMarker = new atlas.HtmlMarker({
+                    position: startCoords,
+                    htmlContent: '<div style="background-color:#0EA5A2;width:16px;height:16px;border-radius:50%;border:3px solid white;box-shadow:0 2px 5px rgba(0,0,0,0.3);"></div>'
+                });
+                map.markers.add(startMarker);
+
+                endMarker = new atlas.HtmlMarker({
+                    position: endCoords,
+                    htmlContent: '<div style="background-color:#214141;width:24px;height:24px;border-radius:50%;border:3px solid white;box-shadow:0 2px 5px rgba(0,0,0,0.3);display:flex;justify-content:center;align-items:center;"><i class="fa-solid fa-flag-checkered" style="color:white;font-size:12px;"></i></div>'
+                });
+                map.markers.add(endMarker);
+
+                // Add initial zones
+                refreshZones();
+
+                // Demo Click logic
+                map.events.add('click', async (e) => {
+                    const addNoiseBtn = document.getElementById('addNoiseBtn');
+                    const isAddingNoise = addNoiseBtn.classList.contains('bg-orange-100');
+
+                    if (!isAddingNoise || isCalculating) return;
+
+                    const pos = e.position;
+                    globalNoiseZones.push([pos[0], pos[1]]);
+
+                    // Visually add new zone immediately
+                    const circle = createCircle([pos[0], pos[1]], 150);
+                    datasource.add(new atlas.data.Feature(circle, {
+                        fillColor: '#F97316',
+                        fillOpacity: 0.2,
+                        strokeColor: '#F97316',
+                        strokeWidth: 2
+                    }));
+
+                    // Recalculate route
+                    await calculateAndDisplayRoute(true);
+                    const alertEl = document.getElementById('alertText');
+                    if (alertEl) alertEl.textContent = 'Route updated due to sudden noise!';
+                });
+            });
+        }
+
+        function createCircle(center, radiusInMeters) {
+            const points = [];
+            const distanceX = radiusInMeters / (111320 * Math.cos(center[1] * Math.PI / 180));
+            const distanceY = radiusInMeters / 110540;
+            for (let i = 0; i <= 360; i += 10) {
+                const angle = i * Math.PI / 180;
+                points.push([center[0] + (distanceX * Math.cos(angle)), center[1] + (distanceY * Math.sin(angle))]);
+            }
+            return new atlas.data.Polygon([points]);
+        }
+
+        function refreshZones() {
+            if (!datasource) return;
+            const features = datasource.getShapes().filter(f => f.getProperties().type !== 'route');
+            datasource.remove(features);
+
+            globalNoiseZones.forEach(z => {
+                datasource.add(new atlas.data.Feature(createCircle(z, 150), {
+                    fillColor: '#F97316', fillOpacity: 0.2, strokeColor: '#F97316', strokeWidth: 2
+                }));
+            });
+            globalConstructionZones.forEach(z => {
+                datasource.add(new atlas.data.Feature(createCircle(z, 400), {
+                    fillColor: '#3B82F6', fillOpacity: 0.2, strokeColor: '#1E40AF', strokeWidth: 2
+                }));
+            });
+            globalCrowdZones.forEach(z => {
+                datasource.add(new atlas.data.Feature(createCircle(z, 250), {
+                    fillColor: '#FFA500', fillOpacity: 0.12, strokeColor: '#F97316', strokeWidth: 1, strokeDash: [3, 3]
+                }));
+            });
+        }
+
+        function getUserLocation() {
+            if (navigator.geolocation) {
+                const startInput = document.getElementById('startInput');
+                if (startInput) startInput.value = "Locating...";
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        const { latitude, longitude } = position.coords;
+                        startCoords = [longitude, latitude];
+                        if (startInput) startInput.value = "Your Current Location";
+                        if (startMarker) startMarker.setOptions({ position: startCoords });
+                        if (map) map.setCamera({ center: startCoords, zoom: 15 });
+                        fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`)
+                            .then(res => res.json()).then(data => {
+                                if (data.display_name && startInput) startInput.value = data.display_name;
+                            });
+                    },
+                    (error) => { alert("Location unavailable"); if (startInput) startInput.value = ""; },
+                    { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+                );
+            }
+        }
+
+        async function getOSRMRoute(waypoints) {
+            const coordsString = waypoints.map(pt => `${pt[0]},${pt[1]}`).join(';');
+            const url = `https://router.project-osrm.org/route/v1/driving/${coordsString}?overview=full&geometries=geojson&steps=true`;
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+                return data.code === 'Ok' ? data.routes[0] : null;
+            } catch (err) { return null; }
+        }
+
+        function pointToSegmentDistance(px, py, x1, y1, x2, y2) {
+            const dx = x2 - x1, dy = y2 - y1, l2 = dx * dx + dy * dy;
+            let t = l2 > 0 ? Math.max(0, Math.min(1, ((px - x1) * dx + (py - y1) * dy) / l2)) : 0;
+            const dist = Math.sqrt(Math.pow(px - (x1 + t * dx), 2) + Math.pow(py - (y1 + t * dy), 2));
+            return { dist };
+        }
+
+        async function solveSafeRoute(start, end, obstacles, radius) {
+            const directRoute = await getOSRMRoute([start, end]);
+            let directCollisions = 0;
+            if (directRoute) {
+                directRoute.legs.forEach(leg => { if (findCollisionInLeg(leg, obstacles, radius)) directCollisions++; });
+            }
+            if (directCollisions === 0) return { route: directRoute, waypoints: [start, end] };
+
+            const strategies = [
+                { la: 0.03, lo: 0 }, { la: -0.03, lo: 0 }, { la: 0, lo: 0.03 }, { la: 0, lo: -0.03 },
+                { la: 0.025, lo: 0.025 }, { la: -0.025, lo: -0.025 }, { la: 0.025, lo: -0.025 }, { la: -0.025, lo: 0.025 }
+            ];
+            let bestRoute = directRoute, minCollisions = directCollisions, shortest = directRoute ? directRoute.distance : Infinity;
+            let bestWp = [start, end];
+
+            for (let s of strategies) {
+                const wp = [start, [start[0] + s.lo + (end[0] - start[0]) / 2, start[1] + s.la + (end[1] - start[1]) / 2], end];
+                const r = await getOSRMRoute(wp);
+                if (!r) continue;
+                let c = 0;
+                r.legs.forEach(leg => { if (findCollisionInLeg(leg, obstacles, radius)) c++; });
+                if (c < minCollisions || (c === minCollisions && r.distance < shortest)) {
+                    minCollisions = c; bestRoute = r; shortest = r.distance; bestWp = wp;
+                }
+            }
+            return { route: bestRoute, waypoints: bestWp };
+        }
+
+        function findCollisionInLeg(leg, obstacles, radius) {
+            if (!leg.steps) return null;
+            for (let step of leg.steps) {
+                const coords = step.geometry.coordinates;
+                for (let i = 0; i < coords.length - 1; i++) {
+                    for (let obs of obstacles) {
+                        if (pointToSegmentDistance(obs[0], obs[1], coords[i][0], coords[i][1], coords[i + 1][0], coords[i + 1][1]).dist < radius) return true;
+                    }
+                }
+            }
+            return false;
+        }
+
+        async function calculateAndDisplayRoute(isDemo = false) {
+            const btn = document.getElementById('findRouteBtn');
+            if (isCalculating || (!isDemo && btn.disabled)) return;
+            try {
+                isCalculating = true;
+                if (!isDemo) {
+                    btn.disabled = true;
+                    btn.querySelector('span').innerText = "Calculating Safe Route...";
+                    btn.querySelector('i').className = "loader";
+                }
+
+                if (datasource) {
+                    const r = datasource.getShapes().filter(f => f.getProperties().type === 'route');
+                    datasource.remove(r);
+                }
+
+                const avoidCrowds = document.getElementById('toggle-crowds').checked;
+                const avoidConst = document.getElementById('toggle-const').checked;
+                let obstacles = [...globalNoiseZones];
+                if (avoidCrowds) obstacles = [...obstacles, ...globalCrowdZones];
+                if (avoidConst) obstacles = [...obstacles, ...globalConstructionZones];
+
+                const tolerance = document.getElementById('noiseSlider').value;
+                const radius = 0.001 + (tolerance / 100) * 0.001;
+
+                const standard = await getOSRMRoute([startCoords, endCoords]);
+                const safeRes = await solveSafeRoute(startCoords, endCoords, obstacles, radius);
+                const safe = safeRes.route;
+
+                if (standard && datasource) {
+                    datasource.add(new atlas.data.Feature(standard.geometry, { type: 'route', routeColor: '#9CA3AF', routeWidth: 3, routeDash: [5, 8], opacity: 0.5 }));
+                }
+                if (safe && datasource) {
+                    const safeFeat = new atlas.data.Feature(safe.geometry, { type: 'route', routeColor: '#0EA5A2', routeWidth: 7, opacity: 1 });
+                    datasource.add(safeFeat);
+                    if (map && !isDemo) {
+                        map.setCamera({ bounds: atlas.data.BoundingBox.fromData(safeFeat), padding: 50 });
+                    }
+                    const stats = document.getElementById('routeStats');
+                    if (stats) {
+                        document.getElementById('routeDistance').textContent = `${(safe.distance / 1000).toFixed(1)} km Rivo Route (${Math.round(safe.duration / 60)} min)`;
+                        stats.classList.remove('hidden');
+                    }
+                }
+                const alert = document.getElementById('gentleAlert');
+                if (alert && !isDemo) {
+                    alert.classList.remove('hidden'); alert.style.opacity = '1';
+                    setTimeout(() => { alert.style.opacity = '0'; setTimeout(() => alert.classList.add('hidden'), 500); }, 4000);
+                }
+            } finally {
+                isCalculating = false;
+                if (btn) {
+                    btn.disabled = false;
+                    btn.querySelector('span').innerText = "Suggest Comfortable Route";
+                    btn.querySelector('i').className = "fa-solid fa-wand-magic-sparkles group-hover:rotate-12 transition-transform";
+                }
+            }
+        }
+
+        function initControls() {
+            document.getElementById('noiseSlider').addEventListener('input', (e) => {
+                const labels = ['Silent', 'Quiet Priority', 'Moderate', 'Lively OK'];
+                document.getElementById('noiseValue').textContent = labels[Math.min(Math.floor(e.target.value / 25), 3)];
+            });
+            document.getElementById('findRouteBtn').addEventListener('click', () => calculateAndDisplayRoute(false));
+            document.getElementById('clearZonesBtn').addEventListener('click', () => {
+                globalNoiseZones = []; globalConstructionZones = []; globalCrowdZones = [];
+                if (datasource) datasource.clear();
+                calculateAndDisplayRoute(true);
+            });
+            const addNoiseBtn = document.getElementById('addNoiseBtn');
+            const demoHint = document.getElementById('demoModeHint');
+            addNoiseBtn.addEventListener('click', () => {
+                const active = addNoiseBtn.classList.toggle('bg-orange-100');
+                addNoiseBtn.classList.toggle('bg-gray-100', !active);
+                addNoiseBtn.classList.toggle('text-orange-700', active);
+                addNoiseBtn.classList.toggle('text-gray-700', !active);
+                demoHint.classList.toggle('hidden', !active);
+                document.getElementById('map').style.cursor = active ? 'crosshair' : '';
+            });
+            document.getElementById('locateMeBtn').addEventListener('click', getUserLocation);
+        }
+
+        function setupAutocomplete() {
+            const inputs = [['startInput', 'startSuggestions', true], ['endInput', 'endSuggestions', false]];
+            inputs.forEach(([id, sugId, isStart]) => {
+                const input = document.getElementById(id);
+                const sug = document.getElementById(sugId);
+                input.addEventListener('input', debounce(async (e) => {
+                    const q = e.target.value;
+                    if (q.length < 3) { sug.classList.add('hidden'); return; }
+                    const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q)}&limit=5`).then(r => r.json());
+                    sug.innerHTML = '';
+                    if (res.length === 0) { sug.classList.add('hidden'); return; }
+                    res.forEach(item => {
+                        const div = document.createElement('div');
+                        div.className = 'px-4 py-2 hover:bg-Rivo-50 cursor-pointer border-b text-sm text-gray-700 truncate';
+                        div.innerHTML = `<i class="fa-solid fa-location-dot text-Rivo-500 mr-2"></i>${item.display_name}`;
+                        div.onclick = () => {
+                            input.value = item.display_name; sug.classList.add('hidden');
+                            const coords = [parseFloat(item.lon), parseFloat(item.lat)];
+                            if (isStart) { startCoords = coords; startMarker.setOptions({ position: coords }); }
+                            else { endCoords = coords; endMarker.setOptions({ position: coords }); }
+                            map.setCamera({ center: coords });
+                        };
+                        sug.appendChild(div);
+                    });
+                    sug.classList.remove('hidden');
+                }, 500));
+            });
+            document.addEventListener('click', (e) => { if (!e.target.closest('.relative')) document.querySelectorAll('[id$="Suggestions"]').forEach(s => s.classList.add('hidden')); });
+        }
+
+        function debounce(func, wait) {
+            let timeout;
+            return function (...args) {
+                clearTimeout(timeout);
+                timeout = setTimeout(() => func(...args), wait);
+            };
+        }
+    </script>
+
+    <!-- Harbor Chatbot Widget -->
+    <script src="chatbot-widget.js"></script>
+</body>
+
+</html>

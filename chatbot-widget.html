@@ -1,0 +1,315 @@
+<!-- Harbor Chatbot Widget - Include this in any page with: <script src="chatbot-widget.html"></script> -->
+<style>
+    #harbor-chatbot-widget {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        width: 380px;
+        height: 500px;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        display: none;
+        flex-direction: column;
+        z-index: 10000;
+        font-family: 'Poppins', sans-serif;
+        overflow: hidden;
+    }
+
+    #harbor-chatbot-widget.open {
+        display: flex;
+    }
+
+    .harbor-chatbot-header {
+        background: linear-gradient(135deg, #0EA5A2 0%, #06B6D4 100%);
+        color: white;
+        padding: 16px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .harbor-chatbot-header h2 {
+        font-size: 16px;
+        flex: 1;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .harbor-chatbot-close {
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 28px;
+        height: 28px;
+        cursor: pointer;
+        font-size: 18px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background 0.3s;
+    }
+
+    .harbor-chatbot-close:hover {
+        background: rgba(255, 255, 255, 0.3);
+    }
+
+    .harbor-messages {
+        flex: 1;
+        overflow-y: auto;
+        padding: 16px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        background: #f8f9fa;
+    }
+
+    .harbor-message {
+        display: flex;
+        animation: slideIn 0.3s ease;
+    }
+
+    @keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .harbor-message.user {
+        justify-content: flex-end;
+    }
+
+    .harbor-message.assistant {
+        justify-content: flex-start;
+    }
+
+    .harbor-bubble {
+        max-width: 70%;
+        padding: 10px 14px;
+        border-radius: 10px;
+        word-wrap: break-word;
+        line-height: 1.4;
+        font-size: 13px;
+    }
+
+    .harbor-message.user .harbor-bubble {
+        background: linear-gradient(135deg, #0EA5A2 0%, #06B6D4 100%);
+        color: white;
+        border-bottom-right-radius: 3px;
+    }
+
+    .harbor-message.assistant .harbor-bubble {
+        background: white;
+        color: #333;
+        border: 1px solid #e0e0e0;
+        border-bottom-left-radius: 3px;
+    }
+
+    .harbor-input-section {
+        padding: 12px;
+        background: white;
+        border-top: 1px solid #e0e0e0;
+        display: flex;
+        gap: 8px;
+    }
+
+    .harbor-input-section input {
+        flex: 1;
+        border: 1px solid #e0e0e0;
+        border-radius: 20px;
+        padding: 10px 14px;
+        font-family: 'Poppins', sans-serif;
+        font-size: 13px;
+        outline: none;
+        transition: border-color 0.3s;
+    }
+
+    .harbor-input-section input:focus {
+        border-color: #0EA5A2;
+    }
+
+    .harbor-send-btn {
+        background: linear-gradient(135deg, #0EA5A2 0%, #06B6D4 100%);
+        color: white;
+        border: none;
+        border-radius: 20px;
+        padding: 10px 16px;
+        cursor: pointer;
+        font-weight: 600;
+        transition: all 0.3s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 40px;
+    }
+
+    .harbor-send-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(14, 165, 162, 0.3);
+    }
+
+    .harbor-toggle-btn {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        width: 60px;
+        height: 60px;
+        background: linear-gradient(135deg, #0EA5A2 0%, #06B6D4 100%);
+        border: none;
+        border-radius: 50%;
+        cursor: pointer;
+        color: white;
+        font-size: 28px;
+        box-shadow: 0 4px 12px rgba(14, 165, 162, 0.3);
+        transition: all 0.3s;
+        z-index: 9999;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .harbor-toggle-btn:hover {
+        transform: scale(1.1);
+        box-shadow: 0 6px 16px rgba(14, 165, 162, 0.4);
+    }
+
+    .harbor-toggle-btn.hidden {
+        display: none;
+    }
+
+    ::-webkit-scrollbar {
+        width: 5px;
+    }
+
+    ::-webkit-scrollbar-track {
+        background: #f1f1f1;
+    }
+
+    ::-webkit-scrollbar-thumb {
+        background: #0EA5A2;
+        border-radius: 3px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+        background: #0d9195;
+    }
+
+    @media (max-width: 480px) {
+        #harbor-chatbot-widget {
+            width: 100%;
+            height: 100%;
+            right: 0;
+            bottom: 0;
+            border-radius: 0;
+            max-width: 100%;
+        }
+
+        .harbor-toggle-btn {
+            width: 50px;
+            height: 50px;
+            font-size: 24px;
+        }
+    }
+</style>
+
+<div id="harbor-chatbot-widget">
+    <div class="harbor-chatbot-header">
+        <h2>⚓ Harbor</h2>
+        <button class="harbor-chatbot-close" onclick="toggleHarborChatbot()">✕</button>
+    </div>
+    <div class="harbor-messages" id="harbor-messages">
+        <div class="harbor-message assistant">
+            <div class="harbor-bubble">👋 Welcome to Harbor! I can help with navigation, routes, and directions. Type a message or ask for help!</div>
+        </div>
+    </div>
+    <div class="harbor-input-section">
+        <input 
+            type="text" 
+            id="harbor-input" 
+            placeholder="Message Harbor..." 
+            onkeypress="handleHarborKeyPress(event)"
+        >
+        <button class="harbor-send-btn" onclick="sendHarborMessage()">➤</button>
+    </div>
+</div>
+
+<button class="harbor-toggle-btn" id="harbor-toggle-btn" onclick="toggleHarborChatbot()">⚓</button>
+
+<script>
+    // Harbor Chatbot Widget Script
+    function toggleHarborChatbot() {
+        const widget = document.getElementById('harbor-chatbot-widget');
+        const toggleBtn = document.getElementById('harbor-toggle-btn');
+        
+        widget.classList.toggle('open');
+        
+        if (widget.classList.contains('open')) {
+            toggleBtn.classList.add('hidden');
+            document.getElementById('harbor-input').focus();
+        } else {
+            toggleBtn.classList.remove('hidden');
+        }
+    }
+
+    function sendHarborMessage() {
+        const input = document.getElementById('harbor-input');
+        const message = input.value.trim();
+        
+        if (!message) return;
+
+        const messagesDiv = document.getElementById('harbor-messages');
+
+        // Add user message
+        const userMsgDiv = document.createElement('div');
+        userMsgDiv.className = 'harbor-message user';
+        userMsgDiv.innerHTML = `<div class="harbor-bubble">${escapeHtml(message)}</div>`;
+        messagesDiv.appendChild(userMsgDiv);
+
+        // Get AI response if getAIResponse is available
+        let responseText = '✓ Message received!';
+        if (typeof window.getAIResponse === 'function') {
+            const result = window.getAIResponse(message);
+            responseText = result.response || responseText;
+        }
+
+        // Add assistant message
+        const assistantMsgDiv = document.createElement('div');
+        assistantMsgDiv.className = 'harbor-message assistant';
+        assistantMsgDiv.innerHTML = `<div class="harbor-bubble">${escapeHtml(responseText)}</div>`;
+        messagesDiv.appendChild(assistantMsgDiv);
+
+        // Clear input and scroll
+        input.value = '';
+        input.focus();
+        messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    }
+
+    function handleHarborKeyPress(event) {
+        if (event.key === 'Enter') {
+            sendHarborMessage();
+        }
+    }
+
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    // Show toggle button on page load
+    window.addEventListener('load', function() {
+        const toggleBtn = document.getElementById('harbor-toggle-btn');
+        if (toggleBtn) {
+            toggleBtn.style.display = 'flex';
+        }
+    });
+</script>

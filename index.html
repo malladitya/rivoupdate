@@ -1,0 +1,1391 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Rivo Navigation</title>
+  <meta name="description"
+    content="Rivo Navigation helps people with autism and sensory sensitivities find quiet, comfortable routes in cities using AI and community reports." />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Open+Sans:wght@400;600&display=swap"
+    rel="stylesheet">
+
+  <!-- EmailJS SDK -->
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+  <script type="text/javascript">
+    (function () {
+      // Initialize EmailJS with placeholder key - User to replace 'YOUR_PUBLIC_KEY'
+      emailjs.init("your public id");
+    })();
+  </script>
+  <!-- Azure Maps Web SDK -->
+  <link rel="stylesheet" href="https://atlas.microsoft.com/sdk/javascript/mapcontrol/2/atlas.min.css" />
+  <script src="https://atlas.microsoft.com/sdk/javascript/mapcontrol/2/atlas.min.js"></script>
+
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Feedback & Testimonials</title>
+
+  <link rel="stylesheet" href="style.css" />
+  <script>
+    if (localStorage.getItem('theme') === 'dark') document.documentElement.classList.add('dark-mode');
+  </script>
+</head>
+
+<body>
+  <a class="skip-link" href="#main">Skip to main content</a>
+
+  <!-- Welcome Popup -->
+  <div id="welcomePopup" class="welcome-overlay" style="display: none;">
+    <div class="welcome-popup">
+      <button class="welcome-close" aria-label="Close">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+      <div class="welcome-icon">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none">
+          <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" stroke="#0EA5A2" stroke-width="2" />
+          <circle cx="12" cy="10" r="3" fill="#0EA5A2" />
+        </svg>
+      </div>
+      <h2>Welcome to Rivo Navigation</h2>
+      <p>Your sensory-friendly navigation companion helping you find quiet, comfortable routes.</p>
+      <div class="welcome-features">
+        <div class="welcome-feature">
+          <span class="feature-emoji">🔇</span>
+          <span>Avoid noisy areas</span>
+        </div>
+        <div class="welcome-feature">
+          <span class="feature-emoji">🌳</span>
+          <span>Prefer calm paths</span>
+        </div>
+        <div class="welcome-feature">
+          <span class="feature-emoji">🤝</span>
+          <span>Community-driven</span>
+        </div>
+      </div>
+      <button class="btn btn--primary btn--lg welcome-btn">
+        Get Started
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="9 18 15 12 9 6"></polyline>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- Theme Toggle -->
+  <button id="themeToggle" class="theme-toggle" aria-label="Toggle dark mode">
+    <svg class="sun-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <circle cx="12" cy="12" r="5" />
+      <line x1="12" y1="1" x2="12" y2="3" />
+      <line x1="12" y1="21" x2="12" y2="23" />
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+      <line x1="1" y1="12" x2="3" y2="12" />
+      <line x1="21" y1="12" x2="23" y2="12" />
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
+    </svg>
+    <svg class="moon-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2">
+      <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+    </svg>
+  </button>
+
+  <div id="site-header-placeholder"></div>
+
+  <main id="main">
+    <!-- Hero -->
+    <section id="home" class="hero" aria-labelledby="hero-title">
+      <div class="container hero-inner">
+        <div class="hero-content reveal">
+          <div class="hero-badge">
+            <span class="badge">🧭 Sensory-Friendly Navigation</span>
+          </div>
+          <h1 id="hero-title">Not just the fastest route, but the most comfortable one.</h1>
+          <p class="hero-subtitle">
+            AI-guided paths that reduce sensory overload—favoring quiet streets, parks, and calming spaces for people
+            with autism and sensory sensitivities.
+          </p>
+          <div class="hero-actions">
+            <a class="btn btn--primary btn--lg" href="rivo.html">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" fill="currentColor" />
+              </svg>
+              Try the App
+            </a>
+            <a class="btn btn--ghost btn--lg" href="#features">
+              Explore Features
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                <path d="M7 13l3 3 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+              </svg>
+            </a>
+          </div>
+
+          <div class="hero-stats">
+            <div class="stat-item">
+              <span class="stat-number">🧭</span>
+              <span class="stat-label">Smart Routing</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-number">⚡</span>
+              <span class="stat-label">Real-time Updates</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-number">🎯</span>
+              <span class="stat-label">Comfort-Focused</span>
+            </div>
+          </div>
+
+          <div class="legend" aria-label="Map legend">
+            <div class="legend-item">
+              <span class="legend-swatch legend-swatch--quiet" aria-hidden="true"></span>
+              <span>Quiet zones</span>
+            </div>
+            <div class="legend-item">
+              <span class="legend-swatch legend-swatch--noisy" aria-hidden="true"></span>
+              <span>Noisy zones</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Azure Map container (3D-wrapped to apply card effect only to map) -->
+        <div class="three-d-stage" aria-hidden="false">
+          <div class="stage">
+            <figure class="card card--map hero-map reveal" aria-describedby="map-desc">
+              <div class="map-overlay">
+                <div class="map-controls">
+                  <button class="map-btn" title="Toggle 3D view">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                      <path d="M12 2l9 4.5v11L12 22l-9-4.5v-11L12 2z" stroke="currentColor" stroke-width="2"
+                        fill="none" />
+                    </svg>
+                  </button>
+                  <button class="map-btn" title="Center map">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                      <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2" fill="none" />
+                      <path
+                        d="M12 1v6M12 17v6M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h6M17 12h6M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"
+                        stroke="currentColor" stroke-width="2" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+              <div id="azureMap" role="img" aria-labelledby="map-title map-desc"></div>
+              <div id="map-title" class="sr-only">City map showing quiet and noisy areas with suggested comfortable
+                routes</div>
+              <div id="map-desc" class="sr-only">Green heat indicates quiet zones; red heat indicates noisy zones. A
+                comfort-aware route avoids high-noise areas.</div>
+            </figure>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Quick comparison: Why choose us -->
+    <section id="comparison" class="section" aria-labelledby="comparison-title">
+      <div class="container reveal">
+        <h2 id="comparison-title">Why choose Rivo?</h2>
+        <p class="section-intro">A quick comparison to help you choose a navigation tool that prioritizes sensory
+          comfort.</p>
+        <div class="grid grid--2 comparison-grid">
+          <div class="problem-card reveal comparison-card">
+            <h3>Rivo — designed for comfort</h3>
+            <ul>
+              <li>Prioritizes quiet & low-crowd routes by default</li>
+              <li>Community-sourced sensory reports (noise, crowding, lighting)</li>
+              <li>AI forecasts comfort by time and location</li>
+              <li>Customizable, gentle alerts and filters</li>
+            </ul>
+          </div>
+
+          <div class="problem-card reveal comparison-card">
+            <h3>Other navigation apps</h3>
+            <ul>
+              <li>Optimized for fastest or shortest travel time</li>
+              <li>Little or no sensory context (noise, crowds)</li>
+              <li>No comfort forecasting tailored to sensitivity</li>
+              <li>Standard audible notifications by default</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Problem in easy language -->
+    <section id="problem" class="section section--alt" aria-labelledby="problem-title">
+      <div class="container reveal">
+        <h2 id="problem-title">The problem in easy language</h2>
+        <div class="problem-grid">
+          <div class="problem-card">
+            <h3>Why moving around is hard</h3>
+            <ul>
+              <li>Some places are too noisy (traffic, crowds, construction).</li>
+              <li>Some routes are too crowded (markets, stations).</li>
+              <li>People don’t know in advance which areas will feel comfortable or overwhelming.</li>
+            </ul>
+          </div>
+          <div class="problem-card">
+            <h3>Why it matters</h3>
+            <ul>
+              <li>Stress and anxiety increase in noisy or crowded places.</li>
+              <li>Families and caregivers struggle to plan calm routes.</li>
+              <li>Many avoid going out, reducing freedom and independence.</li>
+            </ul>
+          </div>
+          <div class="problem-card">
+            <h3>What current apps miss</h3>
+            <p>Most navigation apps only show the fastest or shortest route. They don’t tell you which path is quiet,
+              less crowded, or sensory-friendly.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Features -->
+    <section id="features" class="section" aria-labelledby="features-title">
+      <div class="container">
+        <div class="section-header reveal">
+          <h2 id="features-title">Designed for comfort and accessibility</h2>
+          <p class="section-intro">Every feature is built with sensory sensitivities in mind, creating a navigation
+            experience that truly understands your needs.</p>
+        </div>
+
+        <div class="features-grid">
+          <article class="feature-card feature-card--primary reveal">
+            <div class="feature-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="32" height="32">
+                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"
+                  fill="#0EA5A2"></path>
+              </svg>
+            </div>
+            <h3 class="feature-title">Real-time community reports</h3>
+            <p class="feature-text">Get live updates from our community about noise levels, crowding, construction, and
+              lighting conditions along your route.</p>
+            <div class="feature-tags">
+              <span class="tag">Live updates</span>
+              <span class="tag">Community-driven</span>
+            </div>
+          </article>
+
+          <article class="feature-card feature-card--secondary reveal">
+            <div class="feature-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="32" height="32">
+                <circle cx="12" cy="12" r="3" fill="none" stroke="#3B82F6" stroke-width="2"></circle>
+                <path
+                  d="M12 1v6M12 17v6M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h6M17 12h6M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"
+                  stroke="#3B82F6" stroke-width="2"></path>
+              </svg>
+            </div>
+            <h3 class="feature-title">AI comfort predictions</h3>
+            <p class="feature-text">Advanced algorithms forecast comfort levels throughout the day, helping you plan the
+              perfect time for your journey.</p>
+            <div class="feature-tags">
+              <span class="tag">AI-powered</span>
+              <span class="tag">Predictive</span>
+            </div>
+          </article>
+
+          <article class="feature-card feature-card--accent reveal">
+            <div class="feature-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="32" height="32">
+                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" fill="none" stroke="#22C55E" stroke-width="2">
+                </path>
+                <circle cx="12" cy="10" r="3" fill="#22C55E"></circle>
+              </svg>
+            </div>
+            <h3 class="feature-title">Sensory-optimized routes</h3>
+            <p class="feature-text">Smart routing that prioritizes quiet streets, parks, and calming environments while
+              avoiding high-stimulus areas.</p>
+            <div class="feature-tags">
+              <span class="tag">Smart routing</span>
+              <span class="tag">Sensory-aware</span>
+            </div>
+          </article>
+
+          <article class="feature-card feature-card--warning reveal">
+            <div class="feature-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="32" height="32">
+                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"
+                  fill="none" stroke="#F59E0B" stroke-width="2"></path>
+                <line x1="12" y1="9" x2="12" y2="13" stroke="#F59E0B" stroke-width="2"></line>
+                <circle cx="12" cy="17" r="1" fill="#F59E0B"></circle>
+              </svg>
+            </div>
+            <h3 class="feature-title">Gentle, customizable alerts</h3>
+            <p class="feature-text">Soft notifications that respect your sensory preferences—no sudden sounds or
+              overwhelming visual alerts.</p>
+            <div class="feature-tags">
+              <span class="tag">Customizable</span>
+              <span class="tag">Gentle</span>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+    <!-- new ui for map -->
+
+
+    <!-- Demo -->
+    <section id="demo" class="section section--alt" aria-labelledby="demo-title">
+      <div class="container reveal">
+        <div class="section-header">
+          <h2 id="demo-title">Experience the difference</h2>
+          <p class="section-intro">Try our route planner and see how we prioritize your comfort and sensory needs.</p>
+        </div>
+
+        <div class="demo-container">
+          <div class="demo-box">
+            <div class="demo-header">
+              <h3>Plan your comfortable route</h3>
+              <p>Enter your journey details and we'll find the most sensory-friendly path.</p>
+            </div>
+
+            <div class="demo-form">
+              <div class="input-group">
+                <label for="origin">From</label>
+                <div class="input-wrapper">
+                  <svg class="input-icon" width="16" height="16" viewBox="0 0 24 24" fill="none">
+                    <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" />
+                    <circle cx="12" cy="12" r="3" fill="currentColor" />
+                  </svg>
+                  <input type="text" id="origin" placeholder="Enter starting location" />
+                  <button id="locate-origin" class="map-btn" title="Use current location"
+                    style="position: absolute; right: 8px; padding: 4px; background: transparent; border: none; cursor: pointer; color: var(--Rivo-500);">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <line x1="12" y1="1" x2="12" y2="4"></line>
+                      <line x1="12" y1="20" x2="12" y2="23"></line>
+                      <line x1="4.22" y1="4.22" x2="6.34" y2="6.34"></line>
+                      <line x1="17.66" y1="17.66" x2="19.78" y2="19.78"></line>
+                      <line x1="1" y1="12" x2="4" y2="12"></line>
+                      <line x1="20" y1="12" x2="23" y2="12"></line>
+                      <line x1="4.22" y1="19.78" x2="6.34" y2="17.66"></line>
+                      <line x1="17.66" y1="6.34" x2="19.78" y2="4.22"></line>
+                      <circle cx="12" cy="12" r="3"></circle>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+
+              <div class="input-group">
+                <label for="destination">To</label>
+                <div class="input-wrapper">
+                  <svg class="input-icon" width="16" height="16" viewBox="0 0 24 24" fill="none">
+                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" stroke="currentColor" stroke-width="2" />
+                    <circle cx="12" cy="10" r="3" fill="currentColor" />
+                  </svg>
+                  <input type="text" id="destination" placeholder="Enter destination" />
+                </div>
+              </div>
+
+              <div class="comfort-settings">
+                <h4>Comfort preferences</h4>
+                <div class="preference-grid">
+                  <label class="preference-item" for="pref-noise">
+                    <input type="checkbox" id="pref-noise" checked>
+                    <span class="checkmark"></span>
+                    <span>Avoid noisy areas</span>
+                  </label>
+                  <label class="preference-item" for="pref-crowds">
+                    <input type="checkbox" id="pref-crowds" checked>
+                    <span class="checkmark"></span>
+                    <span>Minimize crowds</span>
+                  </label>
+                  <label class="preference-item" for="pref-green">
+                    <input type="checkbox" id="pref-green">
+                    <span class="checkmark"></span>
+                    <span>Prefer parks & green spaces</span>
+                  </label>
+                  <label class="preference-item" for="pref-const">
+                    <input type="checkbox" id="pref-const">
+                    <span class="checkmark"></span>
+                    <span>Avoid construction zones</span>
+                  </label>
+                </div>
+              </div>
+
+              <div style="display: flex; gap: 8px; margin-bottom: 12px;">
+                <button onclick="goToReportZone('noise')" class="btn" style="flex: 1;">🔊 Report Noise</button>
+                <button onclick="goToReportZone('crowd')" class="btn" style="flex: 1;">👥 Report Crowd</button>
+              </div>
+              <button onclick="checkComfort()" class="btn" style="width: 100%; margin-bottom: 12px;">🤖 Check Comfort
+                Level</button>
+              <a href="rivo.html" class="btn btn--primary btn--lg demo-btn">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" stroke="currentColor" stroke-width="2" />
+                  <circle cx="12" cy="10" r="3" fill="currentColor" />
+                </svg>
+                Find comfortable route
+              </a>
+            </div>
+
+            <div class="demo-status">
+              <div class="status-item">
+                <span class="status-dot status-dot--success"></span>
+                <span>Real-time data connected</span>
+              </div>
+              <div class="status-item">
+                <span class="status-dot status-dot--success"></span>
+                <span>AI comfort analysis ready</span>
+              </div>
+              <div class="status-item">
+                <span class="status-dot status-dot--success"></span>
+                <span id="community-reports-count">0 community reports</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="demo-preview">
+            <div class="preview-header">
+              <h4>Route comparison</h4>
+              <p>See the difference between standard and comfort-aware routing</p>
+            </div>
+
+            <div class="route-comparison">
+              <div class="route-option route-option--standard">
+                <div class="route-header">
+                  <span class="route-type">Standard route</span>
+                  <span class="route-time">12 min</span>
+                </div>
+                <div class="route-stats">
+                  <div class="stat">
+                    <span class="stat-label">Noise level</span>
+                    <div class="stat-bar">
+                      <div class="stat-fill" style="width: 85%; background: var(--noisy);"></div>
+                    </div>
+                  </div>
+                  <div class="stat">
+                    <span class="stat-label">Crowd density</span>
+                    <div class="stat-bar">
+                      <div class="stat-fill" style="width: 70%; background: var(--noisy);"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="route-option route-option--comfort">
+                <div class="route-header">
+                  <span class="route-type">Comfort route</span>
+                  <span class="route-time">15 min</span>
+                  <span class="route-badge">Recommended</span>
+                </div>
+                <div class="route-stats">
+                  <div class="stat">
+                    <span class="stat-label">Noise level</span>
+                    <div class="stat-bar">
+                      <div class="stat-fill" style="width: 25%; background: var(--quiet);"></div>
+                    </div>
+                  </div>
+                  <div class="stat">
+                    <span class="stat-label">Crowd density</span>
+                    <div class="stat-bar">
+                      <div class="stat-fill" style="width: 30%; background: var(--quiet);"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Report Zone Section -->
+      <section id="report-zone" class="section section--alt" aria-labelledby="report-zone-title">
+        <div class="container reveal">
+          <h2 id="report-zone-title">Report a Zone</h2>
+          <p class="section-intro">Help the community by reporting noisy or construction areas. Zones auto-expire in 5 minutes.</p>
+          
+          <div class="report-zone-card">
+            <div class="report-zone-form">
+              <!-- Place Name Input -->
+              <div class="report-input-group">
+                <label for="reportPlaceInputIndex" class="report-label">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                    <circle cx="12" cy="10" r="3"/>
+                  </svg>
+                  Location
+                </label>
+                <div class="report-input-wrapper">
+                  <input type="text" id="reportPlaceInputIndex" 
+                    class="report-input"
+                    placeholder="Enter place name (e.g., Sector 17, Chandigarh)"
+                    autocomplete="off">
+                  <button type="button" id="useCurrentLocationBtn" class="current-location-btn" title="Use current location">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <circle cx="12" cy="12" r="10"/>
+                      <circle cx="12" cy="12" r="3"/>
+                      <line x1="12" y1="2" x2="12" y2="6"/>
+                      <line x1="12" y1="18" x2="12" y2="22"/>
+                      <line x1="2" y1="12" x2="6" y2="12"/>
+                      <line x1="18" y1="12" x2="22" y2="12"/>
+                    </svg>
+                  </button>
+                  <div id="reportPlaceSuggestionsIndex" class="report-suggestions"></div>
+                </div>
+              </div>
+              
+              <!-- Zone Type Dropdown -->
+              <div class="report-input-group">
+                <label for="reportZoneTypeIndex" class="report-label">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 22s-8-4.5-8-11.8A8 8 0 0 1 12 2a8 8 0 0 1 8 8.2c0 7.3-8 11.8-8 11.8z"/>
+                    <circle cx="12" cy="10" r="3"/>
+                  </svg>
+                  Zone Type
+                </label>
+                <select id="reportZoneTypeIndex" class="report-select">
+                  <option value="noise">🔊 Noise Zone</option>
+                  <option value="crowd">👥 Crowded Area</option>
+                  <option value="construction">🚧 Construction Zone</option>
+                </select>
+              </div>
+              
+              <!-- Report Button -->
+              <button id="reportZoneBtnIndex" class="btn btn--primary report-btn" disabled>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <line x1="22" y1="2" x2="11" y2="13"></line>
+                  <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                </svg>
+                Report Zone
+              </button>
+            </div>
+            
+            <!-- Status Message -->
+            <div id="reportStatusIndex" class="report-status" style="display: none;">
+              <span id="reportStatusIconIndex" class="report-status-icon">✓</span>
+              <span id="reportStatusTextIndex"></span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Testimonials -->
+      <section id="testimonials" class="section" aria-labelledby="testimonials-title">
+        <div class="container">
+          <h2 id="testimonials-title">What people say</h2>
+          <div class="grid grid--2">
+            <blockquote class="quote reveal">
+              <p>“For the first time, I can choose paths that feel good to me—not just fast.”</p>
+              <footer><cite>Ananya, student</cite></footer>
+            </blockquote>
+            <blockquote class="quote reveal">
+              <p>“The alerts help me avoid loud areas when I’m already stressed. It’s a relief.”</p>
+              <footer><cite>Rahul, designer</cite></footer>
+            </blockquote>
+          </div>
+        </div>
+      </section>
+
+      <!-- Contact -->
+      <section id="contact" class="section section--alt" aria-labelledby="contact-title">
+        <div class="container reveal">
+          <h2 id="contact-title">Contact us</h2>
+          <p class="section-intro">Questions or ideas? We’d love to hear from you.</p>
+          <form class="contact-form" aria-describedby="contact-help">
+            <div class="input-row">
+              <div class="input-group">
+                <label for="name">Name</label>
+                <input id="name" name="name" type="text" autocomplete="name" required />
+              </div>
+              <div class="input-group">
+                <label for="email">Email</label>
+                <input id="email" name="email" type="email" autocomplete="email" required />
+              </div>
+            </div>
+            <div class="input-group">
+              <label for="message">Message</label>
+              <textarea id="message" name="message" rows="4" required></textarea>
+            </div>
+            <button type="submit" class="btn btn--primary">Send</button>
+            <p id="contact-help" class="form-hint">We respond within 2–3 business days.</p>
+          </form>
+        </div>
+      </section>
+      <!-- Feedback & Testimonials -->
+
+      <div id="site-footer-placeholder"></div>
+
+      <script src="layout.js"></script>
+      <script src="script.js"></script>
+      <script src="helpers.js"></script>
+      
+      <!-- Report Zone Functionality -->
+      <script>
+        // Report Zone by Place Name
+        (function() {
+          let reportPlaceCoords = null;
+          
+          const reportInput = document.getElementById('reportPlaceInputIndex');
+          const reportSuggestions = document.getElementById('reportPlaceSuggestionsIndex');
+          const reportBtn = document.getElementById('reportZoneBtnIndex');
+          const reportStatus = document.getElementById('reportStatusIndex');
+          const reportStatusText = document.getElementById('reportStatusTextIndex');
+          const reportStatusIcon = document.getElementById('reportStatusIconIndex');
+          const zoneTypeSelect = document.getElementById('reportZoneTypeIndex');
+          
+          if (!reportInput || !reportBtn) return;
+          
+          // Debounce helper
+          const debounce = (func, wait) => {
+            let timeout;
+            return function(...args) {
+              clearTimeout(timeout);
+              timeout = setTimeout(() => func(...args), wait);
+            };
+          };
+          
+          // Fetch place suggestions from Nominatim
+          const fetchSuggestions = debounce(async (query) => {
+            if (query.length < 3) {
+              reportSuggestions.classList.remove('active');
+              return;
+            }
+            
+            try {
+              const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5`;
+              const response = await fetch(url);
+              const results = await response.json();
+              
+              reportSuggestions.innerHTML = '';
+              
+              if (results.length === 0) {
+                reportSuggestions.classList.remove('active');
+                return;
+              }
+              
+              results.forEach(result => {
+                const div = document.createElement('div');
+                div.className = 'report-suggestion-item';
+                div.innerHTML = `
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                    <circle cx="12" cy="10" r="3"/>
+                  </svg>
+                  <span>${result.display_name}</span>
+                `;
+                div.addEventListener('click', () => {
+                  reportInput.value = result.display_name.split(',')[0];
+                  reportPlaceCoords = {
+                    lat: parseFloat(result.lat),
+                    lng: parseFloat(result.lon),
+                    name: result.display_name.split(',')[0]
+                  };
+                  reportSuggestions.classList.remove('active');
+                  reportBtn.disabled = false;
+                });
+                reportSuggestions.appendChild(div);
+              });
+              
+              reportSuggestions.classList.add('active');
+              
+            } catch (error) {
+              console.error("Geocoding error:", error);
+            }
+          }, 500);
+          
+          // Input event
+          reportInput.addEventListener('input', (e) => {
+            reportPlaceCoords = null;
+            reportBtn.disabled = true;
+            fetchSuggestions(e.target.value);
+          });
+          
+          // Close suggestions on outside click
+          document.addEventListener('click', (e) => {
+            if (!e.target.closest('#reportPlaceInputIndex') && !e.target.closest('#reportPlaceSuggestionsIndex')) {
+              reportSuggestions.classList.remove('active');
+            }
+          });
+          
+          // Show status message
+          function showStatus(type, message) {
+            reportStatus.style.display = 'flex';
+            reportStatus.className = 'report-status ' + type;
+            reportStatusText.textContent = message;
+            reportStatusIcon.textContent = type === 'success' ? '✓' : '✗';
+            
+            setTimeout(() => {
+              reportStatus.style.display = 'none';
+            }, 5000);
+          }
+          
+          // Report button click
+          reportBtn.addEventListener('click', async () => {
+            if (!reportPlaceCoords) return;
+            
+            const zoneType = zoneTypeSelect.value;
+            const { lat, lng, name } = reportPlaceCoords;
+            
+            // Disable button
+            reportBtn.disabled = true;
+            const originalHTML = reportBtn.innerHTML;
+            reportBtn.innerHTML = `
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="spin">
+                <circle cx="12" cy="12" r="10" stroke-dasharray="32" stroke-dashoffset="32"/>
+              </svg>
+              Adding...
+            `;
+            
+            try {
+              // Save to localStorage with timestamp
+              const savedZones = JSON.parse(localStorage.getItem('userReportedZones') || '[]');
+              savedZones.push({
+                coords: [lng, lat],
+                type: zoneType,
+                name: name,
+                timestamp: Date.now()
+              });
+              localStorage.setItem('userReportedZones', JSON.stringify(savedZones));
+              
+              // Show success
+              const zoneLabels = { noise: 'Noise', crowd: 'Crowded', construction: 'Construction' };
+              const zoneLabel = zoneLabels[zoneType] || zoneType;
+              showStatus('success', `${zoneLabel} zone reported at "${name}" - expires in 5 min`);
+              
+              // Clear input
+              reportInput.value = '';
+              reportPlaceCoords = null;
+              
+              console.log(`📍 Zone reported: ${name} at [${lat}, ${lng}]`);
+              
+            } catch (error) {
+              console.error("Error reporting zone:", error);
+              showStatus('error', 'Failed to report zone. Please try again.');
+            }
+            
+            // Reset button
+            reportBtn.innerHTML = originalHTML;
+          });
+          
+          // Clean up expired zones (older than 5 minutes)
+          function cleanupExpiredZones() {
+            const FIVE_MINUTES = 5 * 60 * 1000;
+            const savedZones = JSON.parse(localStorage.getItem('userReportedZones') || '[]');
+            const activeZones = savedZones.filter(zone => (Date.now() - zone.timestamp) < FIVE_MINUTES);
+            localStorage.setItem('userReportedZones', JSON.stringify(activeZones));
+          }
+          
+          // Run cleanup on load and periodically
+          cleanupExpiredZones();
+          setInterval(cleanupExpiredZones, 60000);
+          
+          // Current Location Button
+          const currentLocationBtn = document.getElementById('useCurrentLocationBtn');
+          if (currentLocationBtn) {
+            currentLocationBtn.addEventListener('click', async () => {
+              currentLocationBtn.classList.add('loading');
+              
+              if (!navigator.geolocation) {
+                showStatus('error', 'Geolocation is not supported by your browser');
+                currentLocationBtn.classList.remove('loading');
+                return;
+              }
+              
+              navigator.geolocation.getCurrentPosition(
+                async (position) => {
+                  const lat = position.coords.latitude;
+                  const lng = position.coords.longitude;
+                  
+                  // Reverse geocode to get place name
+                  try {
+                    const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`;
+                    const response = await fetch(url);
+                    const data = await response.json();
+                    
+                    const placeName = data.address?.suburb || data.address?.neighbourhood || 
+                                     data.address?.village || data.address?.town || 
+                                     data.address?.city || 'Current Location';
+                    
+                    reportInput.value = placeName;
+                    reportPlaceCoords = { lat, lng, name: placeName };
+                    reportBtn.disabled = false;
+                    
+                    showStatus('success', `📍 Location detected: ${placeName}`);
+                  } catch (e) {
+                    reportInput.value = 'Current Location';
+                    reportPlaceCoords = { lat, lng, name: 'Current Location' };
+                    reportBtn.disabled = false;
+                  }
+                  
+                  currentLocationBtn.classList.remove('loading');
+                },
+                (error) => {
+                  console.error('Geolocation error:', error);
+                  let errorMsg = 'Unable to get location';
+                  if (error.code === 1) errorMsg = 'Location permission denied';
+                  if (error.code === 2) errorMsg = 'Location unavailable';
+                  if (error.code === 3) errorMsg = 'Location request timed out';
+                  showStatus('error', errorMsg);
+                  currentLocationBtn.classList.remove('loading');
+                },
+                { enableHighAccuracy: true, timeout: 10000 }
+              );
+            });
+          }
+          
+          // Add spin animation
+          const style = document.createElement('style');
+          style.textContent = `
+            @keyframes spin { to { transform: rotate(360deg); } }
+            .spin { animation: spin 1s linear infinite; }
+          `;
+          document.head.appendChild(style);
+        })();
+        
+        // Global function to scroll to report zone and pre-select type
+        function goToReportZone(type) {
+          const reportSection = document.getElementById('report-zone');
+          const zoneTypeSelect = document.getElementById('reportZoneTypeIndex');
+          
+          if (reportSection) {
+            reportSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            
+            // Pre-select the zone type
+            if (zoneTypeSelect && type) {
+              zoneTypeSelect.value = type;
+              // Add highlight effect
+              zoneTypeSelect.style.boxShadow = '0 0 0 3px rgba(14, 165, 162, 0.3)';
+              setTimeout(() => {
+                zoneTypeSelect.style.boxShadow = '';
+              }, 2000);
+            }
+            
+            // Focus on input after scroll
+            setTimeout(() => {
+              const reportInput = document.getElementById('reportPlaceInputIndex');
+              if (reportInput) reportInput.focus();
+            }, 500);
+          }
+        }
+      </script>
+      
+      <!-- Navigation Panel (Turn-by-Turn) -->
+      <div id="navigationPanel" class="navigation-panel" style="display: none;">
+        <div class="navigation-header">
+          <h3>🧭 Navigation</h3>
+          <button id="closeNavPanel" class="close-btn">✕</button>
+        </div>
+        <div class="navigation-content">
+          <div class="next-turn">
+            <div class="turn-icon" id="turnIcon">➡️</div>
+            <div class="turn-info">
+              <div class="turn-direction" id="turnDirection">Heading towards destination</div>
+              <div class="turn-distance" id="turnDistance">Calculating...</div>
+            </div>
+          </div>
+          <div class="instructions-list" id="instructionsList" style="margin-top: 20px; display: none;">
+            <h4>📋 Directions</h4>
+            <ol id="directionsOL" style="padding-left: 20px;"></ol>
+          </div>
+        </div>
+      </div>
+
+      <style>
+        .navigation-panel {
+          position: fixed;
+          bottom: 20px;
+          right: 20px;
+          width: 350px;
+          max-width: 90vw;
+          background: white;
+          border-radius: 12px;
+          box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+          z-index: 100;
+          font-family: inherit;
+          animation: slideInRight 0.3s ease-out;
+        }
+
+        @keyframes slideInRight {
+          from {
+            opacity: 0;
+            transform: translateX(400px);
+          }
+          to {
+            opacity: 1;
+            transform: translateX(0);
+          }
+        }
+
+        .navigation-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: 15px 20px;
+          border-bottom: 2px solid #f0f0f0;
+          background: linear-gradient(135deg, #0EA5A2 0%, #06B6D4 100%);
+          color: white;
+          border-radius: 12px 12px 0 0;
+        }
+
+        .navigation-header h3 {
+          margin: 0;
+          font-size: 18px;
+          font-weight: 600;
+        }
+
+        .close-btn {
+          background: rgba(255, 255, 255, 0.2);
+          border: none;
+          color: white;
+          font-size: 20px;
+          cursor: pointer;
+          padding: 0;
+          width: 30px;
+          height: 30px;
+          border-radius: 50%;
+          transition: background 0.2s;
+        }
+
+        .close-btn:hover {
+          background: rgba(255, 255, 255, 0.3);
+        }
+
+        .navigation-content {
+          padding: 20px;
+        }
+
+        .next-turn {
+          display: flex;
+          gap: 15px;
+          align-items: center;
+        }
+
+        .turn-icon {
+          font-size: 32px;
+          min-width: 40px;
+          text-align: center;
+        }
+
+        .turn-info {
+          flex: 1;
+        }
+
+        .turn-direction {
+          font-size: 14px;
+          font-weight: 600;
+          color: #0EA5A2;
+          margin-bottom: 5px;
+        }
+
+        .turn-distance {
+          font-size: 18px;
+          font-weight: 700;
+          color: #333;
+        }
+
+        .instructions-list {
+          background: #f8f8f8;
+          padding: 12px;
+          border-radius: 8px;
+          border-left: 4px solid #0EA5A2;
+        }
+
+        .instructions-list h4 {
+          margin: 0 0 10px 0;
+          font-size: 12px;
+          color: #666;
+          text-transform: uppercase;
+        }
+
+        .instructions-list ol {
+          margin: 0;
+          font-size: 12px;
+          color: #555;
+        }
+
+        .instructions-list li {
+          margin-bottom: 6px;
+          line-height: 1.4;
+        }
+
+        @media (max-width: 640px) {
+          .navigation-panel {
+            width: calc(100% - 20px);
+            bottom: 10px;
+            right: 10px;
+          }
+        }
+      </style>
+
+      <script>
+        // Theme Toggle
+        (function () {
+          const themeToggle = document.getElementById('themeToggle');
+          if (!themeToggle) {
+            console.error('Theme toggle button not found!');
+            return;
+          }
+
+          console.log('Theme toggle initialized');
+
+          themeToggle.addEventListener('click', () => {
+            console.log('Theme toggle clicked');
+            const html = document.documentElement;
+            const body = document.body;
+            
+            const isDark = html.classList.toggle('dark-mode');
+            body.classList.toggle('dark-mode'); // Also add to body
+            
+            localStorage.setItem('theme', isDark ? 'dark' : 'light');
+            console.log('Theme is now:', isDark ? 'dark' : 'light');
+            console.log('HTML classes:', html.className);
+            console.log('Body classes:', body.className);
+            console.log('Computed bg color:', getComputedStyle(body).backgroundColor);
+          });
+        })();
+
+        // Welcome popup
+        (function () {
+          const popup = document.getElementById('welcomePopup');
+          if (!popup) return;
+
+          if (!sessionStorage.getItem('welcomeSeen')) {
+            popup.style.display = 'flex';
+          }
+
+          const closePopup = () => {
+            popup.style.opacity = '0';
+            setTimeout(() => {
+              popup.style.display = 'none';
+              sessionStorage.setItem('welcomeSeen', 'true');
+            }, 300);
+          };
+
+          popup.querySelector('.welcome-close').onclick = closePopup;
+          popup.querySelector('.welcome-btn').onclick = closePopup;
+          popup.onclick = (e) => { if (e.target === popup) closePopup(); };
+          document.onkeydown = (e) => { if (e.key === 'Escape' && popup.style.display === 'flex') closePopup(); };
+        })();
+
+        // Demo: Show AI comfort prediction
+        setInterval(() => {
+          if (window.comfortAI) {
+            const prediction = comfortAI.predict([77.4538, 28.6692], Date.now());
+            console.log(`AI Comfort Level: ${(prediction * 100).toFixed(0)}%`);
+          }
+        }, 5000);
+      </script>
+
+      <!-- AI & Navigation Scripts -->
+      <script src="ai-nlp-engine.js"></script>
+      <script src="ai-action-handler.js"></script>
+      <script src="chatbot-widget.js"></script>
+
+      <!-- Turn-by-Turn Navigation Handler -->
+      <script>
+        // Navigation panel management
+        let navigationState = {
+          routeSegments: [],
+          instructions: [],
+          currentSegmentIndex: 0,
+          nextTurnDistance: 0,
+          nextTurnDirection: '➡️'
+        };
+
+        function updateNavigationPanel() {
+          const navPanel = document.getElementById('navigationPanel');
+          const turnIcon = document.getElementById('turnIcon');
+          const turnDirection = document.getElementById('turnDirection');
+          const turnDistance = document.getElementById('turnDistance');
+
+          if (navigationState.nextTurnDistance > 0) {
+            const iconMap = {
+              'left': '↙️',
+              'right': '↘️',
+              'straight': '⬆️',
+              'arrive': '🎯'
+            };
+            
+            const directionText = {
+              'left': 'Turn LEFT',
+              'right': 'Turn RIGHT',
+              'straight': 'Go STRAIGHT',
+              'arrive': 'You have arrived'
+            };
+
+            turnIcon.textContent = iconMap[navigationState.nextTurnDirection] || '➡️';
+            turnDirection.textContent = directionText[navigationState.nextTurnDirection] || 'Continue';
+            turnDistance.textContent = `${Math.round(navigationState.nextTurnDistance)}m away`;
+          }
+        }
+
+        function showNavigationPanel() {
+          const navPanel = document.getElementById('navigationPanel');
+          navPanel.style.display = 'block';
+
+          const closeBtn = document.getElementById('closeNavPanel');
+          closeBtn.addEventListener('click', () => {
+            navPanel.style.display = 'none';
+          });
+        }
+
+        function hideNavigationPanel() {
+          document.getElementById('navigationPanel').style.display = 'none';
+        }
+
+        // Calculate distance between two coordinates (Haversine formula)
+        function calculateDistance(from, to) {
+          const R = 6371000; // Earth radius in meters
+          const dLat = ((to[1] - from[1]) * Math.PI) / 180;
+          const dLon = ((to[0] - from[0]) * Math.PI) / 180;
+          const a =
+            Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+            Math.cos((from[1] * Math.PI) / 180) *
+              Math.cos((to[1] * Math.PI) / 180) *
+              Math.sin(dLon / 2) *
+              Math.sin(dLon / 2);
+          const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+          return R * c; // Distance in meters
+        }
+
+        // Calculate bearing (compass direction) between two points
+        function calculateBearing(from, to) {
+          const dLon = ((to[0] - from[0]) * Math.PI) / 180;
+          const y = Math.sin(dLon) * Math.cos((to[1] * Math.PI) / 180);
+          const x =
+            Math.cos((from[1] * Math.PI) / 180) * Math.sin((to[1] * Math.PI) / 180) -
+            Math.sin((from[1] * Math.PI) / 180) *
+              Math.cos((to[1] * Math.PI) / 180) *
+              Math.cos(dLon);
+          return (Math.atan2(y, x) * 180) / Math.PI + 360) % 360;
+        }
+
+        // Determine turn direction from bearing change
+        function determineTurnDirection(fromBearing, toBearing) {
+          let diff = (toBearing - fromBearing + 360) % 360;
+          if (diff > 180) diff -= 360;
+
+          if (Math.abs(diff) < 30) return 'straight';
+          if (diff < 0) return 'left';
+          return 'right';
+        }
+
+        // Generate turns from route coordinates
+        function generateTurns(routeCoordinates) {
+          if (routeCoordinates.length < 2) return [];
+
+          const segments = [];
+          for (let i = 0; i < routeCoordinates.length - 1; i++) {
+            const from = routeCoordinates[i];
+            const to = routeCoordinates[i + 1];
+            const distance = calculateDistance(from, to);
+            const bearing = calculateBearing(from, to);
+
+            segments.push({
+              from,
+              to,
+              distance,
+              bearing,
+              index: i
+            });
+          }
+
+          // Determine turns
+          const turns = [];
+          for (let i = 0; i < segments.length - 1; i++) {
+            const current = segments[i];
+            const next = segments[i + 1];
+            const turnDirection = determineTurnDirection(current.bearing, next.bearing);
+
+            turns.push({
+              ...current,
+              nextTurnDirection: turnDirection
+            });
+          }
+
+          // Add final segment
+          if (segments.length > 0) {
+            turns.push({
+              ...segments[segments.length - 1],
+              nextTurnDirection: 'arrive'
+            });
+          }
+
+          return turns;
+        }
+
+        // Generate human-readable instructions
+        function generateNavigationInstructions(turns) {
+          if (turns.length === 0) return [];
+
+          const instructions = ['📍 Start and head towards destination'];
+
+          for (let i = 0; i < turns.length - 1; i++) {
+            const turn = turns[i];
+            const directionEmoji = {
+              'left': '↙️',
+              'right': '↘️',
+              'straight': '⬆️'
+            };
+
+            const directionText = {
+              'left': 'Turn left',
+              'right': 'Turn right',
+              'straight': 'Continue straight'
+            };
+
+            instructions.push(
+              `${directionEmoji[turn.nextTurnDirection] || '🛣️'} ${directionText[turn.nextTurnDirection]} after ${Math.round(turn.distance)}m`
+            );
+          }
+
+          instructions.push('🎯 You have arrived');
+          return instructions;
+        }
+
+        // Setup turn-by-turn navigation from route
+        function setupTurnByTurnNavigation(routeCoordinates) {
+          if (!routeCoordinates || routeCoordinates.length < 2) return;
+
+          navigationState.routeSegments = generateTurns(routeCoordinates);
+          navigationState.instructions = generateNavigationInstructions(navigationState.routeSegments);
+          navigationState.currentSegmentIndex = 0;
+
+          console.log('✅ Turn-by-turn navigation setup:', navigationState.instructions);
+
+          // Display instructions in panel
+          const ol = document.getElementById('directionsOL');
+          if (ol) {
+            ol.innerHTML = navigationState.instructions
+              .map((instr) => `<li>${instr}</li>`)
+              .join('');
+            document.getElementById('instructionsList').style.display = 'block';
+          }
+
+          showNavigationPanel();
+          updateNavigationDisplay(routeCoordinates[0], routeCoordinates);
+        }
+
+        // Update navigation display based on current location
+        function updateNavigationDisplay(currentLocation, routeCoordinates) {
+          if (navigationState.routeSegments.length === 0) return;
+
+          // Find closest point on route
+          let minDist = Infinity;
+          let closestSegmentIndex = 0;
+
+          for (let i = 0; i < navigationState.routeSegments.length - 1; i++) {
+            const segment = navigationState.routeSegments[i];
+            const distToNext = calculateDistance(currentLocation, segment.to);
+
+            if (distToNext < minDist) {
+              minDist = distToNext;
+              closestSegmentIndex = i;
+            }
+          }
+
+          navigationState.currentSegmentIndex = closestSegmentIndex;
+          const currentSegment = navigationState.routeSegments[closestSegmentIndex];
+
+          if (currentSegment) {
+            navigationState.nextTurnDirection = currentSegment.nextTurnDirection;
+            navigationState.nextTurnDistance = calculateDistance(
+              currentLocation,
+              currentSegment.to
+            );
+
+            updateNavigationPanel();
+          }
+        }
+
+        // Expose to global scope
+        window.setupTurnByTurnNavigation = setupTurnByTurnNavigation;
+        window.updateNavigationDisplay = updateNavigationDisplay;
+        window.navigationState = navigationState;
+
+        console.log('✅ Turn-by-turn navigation module loaded');
+      </script>
+
+      <!-- Dynamic Route Recalculation -->
+      <script>
+        const liveTracking = {
+          active: false,
+          watchId: null,
+          currentLocation: null,
+          destination: null,
+          lastRecalculatedAt: 0,
+          recalculationThreshold: 50, // meters
+          minRecalculationInterval: 3000 // milliseconds
+        };
+
+        function startLiveLocationTracking(destination) {
+          if (liveTracking.active) {
+            console.log('⚠️ Live tracking already active');
+            return;
+          }
+
+          if (!navigator.geolocation) {
+            console.error('❌ Geolocation not supported');
+            return;
+          }
+
+          liveTracking.destination = destination;
+          liveTracking.active = true;
+
+          console.log('🔴 Live location tracking started');
+
+          liveTracking.watchId = navigator.geolocation.watchPosition(
+            (position) => {
+              const { latitude, longitude, accuracy } = position.coords;
+              liveTracking.currentLocation = [longitude, latitude];
+
+              console.log(`📍 Location updated: ${latitude.toFixed(4)}, ${longitude.toFixed(4)} (±${Math.round(accuracy)}m)`);
+
+              // Recalculate route if threshold exceeded
+              const now = Date.now();
+              if (now - liveTracking.lastRecalculatedAt > liveTracking.minRecalculationInterval) {
+                recalculateRouteFromLiveLocation(liveTracking.currentLocation, destination);
+                liveTracking.lastRecalculatedAt = now;
+              }
+            },
+            (error) => {
+              console.error('❌ Geolocation error:', error);
+            },
+            {
+              enableHighAccuracy: true,
+              timeout: 10000,
+              maximumAge: 0
+            }
+          );
+        }
+
+        function stopLiveLocationTracking() {
+          if (liveTracking.watchId !== null) {
+            navigator.geolocation.clearWatch(liveTracking.watchId);
+            liveTracking.active = false;
+            liveTracking.watchId = null;
+            console.log('🛑 Live tracking stopped');
+          }
+        }
+
+        function recalculateRouteFromLiveLocation(origin, destination) {
+          if (typeof window.planComfortableRoute === 'function') {
+            console.log('✅ Route recalculated from live location');
+            window.planComfortableRoute(origin, destination, false);
+
+            // Update navigation display if available
+            if (typeof window.updateNavigationDisplay === 'function') {
+              // Get current route from map datasource
+              if (window.currentRouteCoordinates) {
+                window.updateNavigationDisplay(origin, window.currentRouteCoordinates);
+              }
+            }
+          }
+        }
+
+        // Expose to global scope
+        window.startLiveLocationTracking = startLiveLocationTracking;
+        window.stopLiveLocationTracking = stopLiveLocationTracking;
+        window.recalculateRouteFromLiveLocation = recalculateRouteFromLiveLocation;
+        window.liveTracking = liveTracking;
+
+        console.log('✅ Dynamic route recalculation module loaded');
+      </script>
+</body>
+
+</html>
